@@ -4,6 +4,7 @@ using namespace std;
 
 void mostrarMenuInicial() {
     int opcion = 0;
+    Usuario usuario;
 
     while (true)
     {
@@ -16,26 +17,28 @@ void mostrarMenuInicial() {
 
         if (opcion == 1)
         {
-            cout << "\nMenu de registro...\n\n";
-            mostrarMenuPrincipal();
+            usuario = mostrarMenuRegistro();
+            false;
         } else if (opcion == 2)
         {
             cout << "\nMenu de inicio de sesion...\n\n";
-            mostrarMenuPrincipal();
+            //mostrarMenuPrincipal();
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
             break;
         }
+
+        mostrarMenuPrincipal(usuario);
     }
 }
 
-void mostrarMenuPrincipal() {
+void mostrarMenuPrincipal(Usuario usuario) {
     int opcion = 0;
 
     while (true)
     {
-        cout << "MENU\n";
+        cout << "\n\nMENU\n";
         cout << "1) Catalogo de productos\n";
         cout << "2) Historial de compras\n";
         cout << "3) Mi perfil\n";
@@ -61,5 +64,46 @@ void mostrarMenuPrincipal() {
             break;
         }
     }
+}
+
+Usuario mostrarMenuRegistro() {
+    string nombre_usu, contrasena, direccion, email;
+    int nivel, tipo_subscripcion, codigo_postal;
+
+    Usuario nuevoUsuario;
+
+    cout << "\nMenu de registro\n";
+    cout << "Introduzca los siguientes apartados...\n\n";
+
+    cout << "Nombre de usuario: ";
+    cin >> nombre_usu;
+    nuevoUsuario.setNombre_usuario(nombre_usu);
+
+    cout << "Contrasenya: ";
+    cin >> contrasena;
+    nuevoUsuario.setContrasena_usuario(contrasena);
+
+    cout << "Nivel: ";
+    cin >> nivel;
+    nuevoUsuario.setNivel(nivel);
+
+    cout << "Direccion: ";
+    cin.ignore(); // Limpiar buffer antes de getline
+    getline(cin, direccion);
+    nuevoUsuario.setDireccion(direccion);
+
+    cout << "Email: ";
+    getline(cin, email);
+    nuevoUsuario.setContacto_usuario(email);
+
+    cout << "Tipo de subscripcion: ";
+    cin >> tipo_subscripcion;
+    nuevoUsuario.setId_subscripcion(tipo_subscripcion);
+
+    cout << "Codigo Postal: ";
+    cin >> codigo_postal;
+    nuevoUsuario.setCodigo_postal(codigo_postal);
+
+    return nuevoUsuario;
 }
 

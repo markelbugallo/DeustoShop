@@ -46,3 +46,37 @@ int Usuario::getId_subscripcion() const {
 int Usuario::getCodigo_postal() const {
     return codigo_postal;
 }
+
+
+// Setters
+void Usuario::setId_usuario(int id) {
+    id_usuario = id;
+}
+
+void Usuario::setNombre_usuario(const std::string& nombre) {
+    nombre_usuario = nombre;
+}
+
+void Usuario::setContrasena_usuario(const std::string& contrasena) {
+    contrasena_usuario = contrasena;
+}
+
+void Usuario::setNivel(int n) {
+    nivel = n;
+}
+
+void Usuario::setDireccion(const std::string& dir) {
+    direccion = dir;
+}
+
+void Usuario::setContacto_usuario(const std::string& contacto) {
+    contacto_usuario = contacto;
+}
+
+void Usuario::setId_subscripcion(int id_sub) {
+    id_subscripcion = id_sub;
+}
+
+void Usuario::setCodigo_postal(int cp) {
+    codigo_postal = cp;
+}
