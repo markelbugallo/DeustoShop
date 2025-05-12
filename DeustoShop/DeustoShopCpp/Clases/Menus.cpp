@@ -4,7 +4,7 @@ using namespace std;
 
 void mostrarMenuInicial() {
     int opcion = 0;
-    Usuario usuario;
+    Usuario usuario_actual;
 
     while (true)
     {
@@ -12,16 +12,16 @@ void mostrarMenuInicial() {
         cout << "1) Registrarse\n";
         cout << "2) Iniciar sesion\n";
         cout << "3) Salir\n\n";
-        cout << "Elija una opcion: \n";
+        cout << "Elija una opcion: ";
         cin >> opcion;
 
         if (opcion == 1)
         {
-            usuario = mostrarMenuRegistro();
+            usuario_actual = mostrarMenuRegistro();
             false;
         } else if (opcion == 2)
         {
-            cout << "\nMenu de inicio de sesion...\n\n";
+            cout << "\n\nMenu de inicio de sesion...\n\n";
             //mostrarMenuPrincipal();
         } else if (opcion == 3)
         {
@@ -29,51 +29,19 @@ void mostrarMenuInicial() {
             break;
         }
 
-        mostrarMenuPrincipal(usuario);
-    }
-}
-
-void mostrarMenuPrincipal(Usuario usuario) {
-    int opcion = 0;
-
-    while (true)
-    {
-        cout << "\n\nMENU\n";
-        cout << "1) Catalogo de productos\n";
-        cout << "2) Historial de compras\n";
-        cout << "3) Mi perfil\n";
-        cout << "4) Salir\n\n";
-        cout << "Elija una opcion: \n";
-        cin >> opcion;
-
-        if (opcion == 1)
-        {
-            cout << "\nMostrar catalogo\n";
-            break;
-        } else if (opcion == 2)
-        {
-            cout << "\nMostrar historial de compras\n";
-            break;
-        } else if (opcion == 3)
-        {
-            cout << "\nMostrar mi perfil\n";
-            break;
-        } else if (opcion == 4)
-        {
-            cout << "\nVolviendo al menu inicial...\n\n";
-            break;
-        }
+        mostrarMenuPrincipal(usuario_actual);
     }
 }
 
 Usuario mostrarMenuRegistro() {
+    // variables para almacenar la entrada del usuario
     string nombre_usu, contrasena, direccion, email;
     int nivel, tipo_subscripcion, codigo_postal;
 
+    // variable para añadir el usuario nuevo con las variables introducidas por el usuario
     Usuario nuevoUsuario;
 
-    cout << "\nMenu de registro\n";
-    cout << "Introduzca los siguientes apartados...\n\n";
+    cout << "\nMENU DE REGISTRO\n" << "Introduzca los siguientes apartados...\n";
 
     cout << "Nombre de usuario: ";
     cin >> nombre_usu;
@@ -107,3 +75,70 @@ Usuario mostrarMenuRegistro() {
     return nuevoUsuario;
 }
 
+void mostrarMenuPrincipal(Usuario usuario_actual) {
+    int opcion = 0;
+
+    while (true)
+    {
+        cout << "\nMENU PRINCIPAL\n";
+        cout << "1) Catalogo de productos\n";
+        cout << "2) Historial de compras\n";
+        cout << "3) Mi perfil\n";
+        cout << "4) Salir\n\n";
+        cout << "Elija una opcion: ";
+        cin >> opcion;
+
+        if (opcion == 1)
+        {
+            cout << "\n\nMostrar catalogo\n";
+            break;
+        } else if (opcion == 2)
+        {
+            cout << "\n\nMostrar historial de compras\n";
+            break;
+        } else if (opcion == 3)
+        {
+            mostrarMenuMiPerfil(usuario_actual);
+            break;
+        } else if (opcion == 4)
+        {
+            cout << "\nCerrando sesion...\n\n";
+            break;
+        }
+    }
+}
+
+void mostrarMenuMiPerfil(Usuario usuario_actual) {
+    int opcion;
+
+    cout << "\n\nMI PERFIL\n" << "---------" << endl;
+
+    // Visualizar datos del usuario actual
+    cout << "Nombre de usuario: " << usuario_actual.getNombre_usuario() << endl;
+    cout << "Nivel: " << usuario_actual.getNivel() << endl;
+    cout << "Direccion: " << usuario_actual.getDireccion() << endl;
+    cout << "Email: " << usuario_actual.getContacto_usuario() << endl;
+    cout << "Subscripcion: " << usuario_actual.getId_subscripcion() << endl;
+    cout << "Codigo Postal: " << usuario_actual.getCodigo_postal() << endl;
+
+    // Funcionalidades
+    cout <<  endl << "1) Modificar datos" << endl;
+    cout << "2) Eliminar perfil" << endl;
+    cout << "3) Volver al menu principal" << endl;
+    cout << endl << "Elija una opcion: ";
+    cin >> opcion;
+
+    if (opcion == 1)
+    {
+        cout << "Modificar datos" << endl;
+        mostrarMenuMiPerfil(usuario_actual);
+    } else if (opcion == 2)
+    {
+        cout << "Eliminar perfil" << endl;
+        mostrarMenuMiPerfil(usuario_actual);
+    } else if (opcion == 3)
+    {
+        cout << "Volviendo al menu principal..." << endl;
+        mostrarMenuPrincipal(usuario_actual);
+    }
+}

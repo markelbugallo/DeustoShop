@@ -3,7 +3,8 @@
 #include "Usuario.h"
 
 void mostrarMenuInicial();
-void mostrarMenuPrincipal(Usuario Usuario);
 Usuario mostrarMenuRegistro();
+void mostrarMenuPrincipal(Usuario usuario);
+void mostrarMenuMiPerfil(Usuario usuario);
 
 #endif // MENUS_H
