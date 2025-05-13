@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <winsock2.h>
+#include <sstream>
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 using namespace std;
@@ -56,7 +57,7 @@ int main() {
     cout << "Esperando conexiones..." << endl;
     int stsize = sizeof(struct sockaddr);
 	comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize);
-
+	
 	// Using comm_socket is able to send/receive data to/from connected client
 	if (comm_socket == INVALID_SOCKET) {
 		cout << "Accept failed with error code : " << to_string(WSAGetLastError()) << endl;
@@ -64,26 +65,26 @@ int main() {
 		WSACleanup();
 		return 1;
 	}
+	cout << "Conexion aceptada." << endl;
     cout << "Conexion entrante desde: " << inet_ntoa(client.sin_addr) << " (" << ntohs(client.sin_port) << ")" << endl;
 
 	// Closing the listening sockets (is not going to be used anymore)
 	closesocket(conn_socket);
 
     //SEND and RECEIVE data
-	cout << "Waiting for incoming messages from client... " << endl;
+	cout << "Esperando mensajes entrantes del cliente... " << endl;
 	do {
 		int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
 		if (bytes > 0) {
-			cout << "Receiving message... " << endl;
-			cout << "Data received:  "  << recvBuff << endl;
+			cout << "Recibiendo mensaje... " << endl;
+			cout << "Datos recibidos:  " << recvBuff << endl;
 
-			cout << "Sending reply... " << endl;
-			strcpy(sendBuff, "ACK -> ");
-			strcat(sendBuff, recvBuff);
+			cout << "Mandando respuesta... " << endl;
+			strcpy(sendBuff, "EXITO");
             send(comm_socket, sendBuff, strlen(sendBuff), 0);
-			cout << "Data sent: " << sendBuff << endl;
+			cout << "Datos enviados: " << sendBuff << endl;
 
-			if (strcmp(recvBuff, "Bye") == 0)
+			if (strcmp(recvBuff, "ADIOS") == 0)
 				break;
 		}
 	} while (1);

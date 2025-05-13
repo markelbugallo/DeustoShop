@@ -1,7 +1,54 @@
 #include <iostream>
+#include <stdio.h>
+#include <winsock2.h>
 #include "Menus-cliente.h"
 #include "../Clases/Usuario.h"
 using namespace std;
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 6000
+
+
+int mandarAlServidor(const string &mensaje, string &respuesta) {
+    WSADATA wsaData;
+	SOCKET s;
+	struct sockaddr_in server;
+	char sendBuff[512], recvBuff[512];
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+		cout << "Failed. Error Code : " << to_string(WSAGetLastError()) << endl;
+		return 1;
+	}
+
+    //SOCKET creation
+	if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+		cout << "Could not create socket : " << to_string(WSAGetLastError()) << endl;
+		WSACleanup();
+		return 1;
+	}
+
+    server.sin_addr.s_addr = inet_addr(SERVER_IP);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(SERVER_PORT);
+
+    //CONNECT to remote server
+	if (connect(s, (struct sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
+		cout << "Connection error: " << to_string(WSAGetLastError()) << endl;
+		closesocket(s);
+		WSACleanup();
+		return 1;
+	}
+
+    send(s, mensaje.c_str(), mensaje.length(), 0);
+    int bytesReceived = recv(s, recvBuff, sizeof(recvBuff), 0);
+    recvBuff[bytesReceived] = '\0';
+    respuesta = recvBuff;
+
+    // CLOSING the socket and cleaning Winsock...
+	closesocket(s);
+	WSACleanup();
+
+    return 0;
+}
 
 void mostrarMenuInicial() {
     int opcion = 0;
@@ -22,8 +69,12 @@ void mostrarMenuInicial() {
             false;
         } else if (opcion == 2)
         {
-            cout << "\n\nMenu de inicio de sesion...\n\n";
-            //mostrarMenuPrincipal();
+            cout << "\n\nProbando server...\n\n";
+            string respuesta;
+            if (mandarAlServidor("VerPERFIL", respuesta) == 0)
+            {
+                //mostrarMenuPrincipal();
+            }
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
