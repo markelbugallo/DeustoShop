@@ -6,27 +6,28 @@ using namespace std;
 class Almacen
 {
 private:
-    string nombre;
-    int postal;
     int id;
-    string direccion;
+    string nombre;
     string contacto;
+    string direccion;
+    int postal;
 
 public:
     Almacen();
     Almacen(
-        const string &nombre,
-        int postal,
         int id,
+        const string &nombre,
+        const string &contacto,
         const string &direccion,
-        const string &contacto
+        int postal
     );
 
-    string getNombre() const;
-    int getPostal() const;
     int getId() const;
-    string getDireccion() const;
+    string getNombre() const;
     string getContacto() const;
+    string getDireccion() const;
+    int getPostal() const;
+    
 };
 
 #endif // ALMACEN_H

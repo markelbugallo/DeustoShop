@@ -1,31 +1,32 @@
 #include "Almacen.h"
 
 // constructor
-Almacen::Almacen(const string &nombre,
-    int postal,
+Almacen::Almacen(
     int id,
+    const string &nombre,
+    const string &contacto,
     const string &direccion,
-    const string &contacto
-) : nombre(nombre), postal(postal), id(id), direccion(direccion), contacto(contacto) {}
+    int postal
+) :  id(id), nombre(nombre), contacto(contacto), direccion(direccion), postal(postal) {}
 
 
 // getters
+int Almacen::getId() const {
+    return id;
+}
+
 string Almacen::getNombre() const {
     return nombre;
 }
 
-int Almacen::getPostal() const {
-    return postal;
-}
-
-int Almacen::getId() const {
-    return id;
+string Almacen::getContacto() const {
+    return contacto;
 }
 
 string Almacen::getDireccion() const {
     return direccion;
 }
 
-string Almacen::getContacto() const {
-    return contacto;
+int Almacen::getPostal() const {
+    return postal;
 }
