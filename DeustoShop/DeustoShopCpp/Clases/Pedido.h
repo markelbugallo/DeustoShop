@@ -1,6 +1,7 @@
 #ifndef PEDIDO_H
 #define PEDIDO_H
 #include <string>
+#include <map>
 using namespace std;
 
 struct Fecha
@@ -18,8 +19,7 @@ private:
     Fecha fecha_pedido;
     string estado_pedido;
     int id_usuario;
-    int id_producto;
-    int cantidad;
+    map<int, int> productosCantidades;
     string direccion;
     int codigo_Postal;
 
@@ -30,8 +30,7 @@ public:
         Fecha fecha_pedido,
         const string &estado_pedido,
         int id_usuario,
-        int id_producto,
-        int cantidad,
+        const map<int, int> productosCantidades,
         const string &direccion,
         int codigo_Postal
     );
@@ -40,8 +39,7 @@ public:
     Fecha getFecha_pedido() const;
     string getEstado_pedido() const;
     int getId_usuario() const;
-    int getId_producto() const;
-    int getCantidad() const;
+    map<int, int> getProductosCantidades() const;
     string getDireccion() const;
     int getCodigo_Postal() const;
 };
