@@ -36,11 +36,11 @@ public:
 
     // Setters
     void setId_usuario(int id);
-    void setNombre_usuario(const std::string& nombre);
-    void setContrasena_usuario(const std::string& contrasena);
-    void setContacto_usuario(const std::string& contacto);
+    void setNombre_usuario(const string &nombre);
+    void setContrasena_usuario(const string &contrasena);
+    void setContacto_usuario(const string &contacto);
     void setId_subscripcion(int id_sub);
-    void setDireccion(const std::string& dir);
+    void setDireccion(const string &dir);
     void setCodigo_postal(int cp);
 
 };
