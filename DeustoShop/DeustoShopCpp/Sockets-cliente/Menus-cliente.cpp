@@ -3,6 +3,7 @@
 #include <winsock2.h>
 #include "Menus-cliente.h"
 #include "../Clases/Usuario.h"
+#include "../Clases/Bd.h"
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -88,7 +89,7 @@ void mostrarMenuInicial() {
 Usuario mostrarMenuRegistro() {
     // variables para almacenar la entrada del usuario
     string nombre_usu, contrasena, direccion, email;
-    int nivel, tipo_subscripcion, codigo_postal;
+    int tipo_subscripcion, codigo_postal;
 
     // variable para añadir el usuario nuevo con las variables introducidas por el usuario
     Usuario nuevoUsuario;
@@ -102,10 +103,6 @@ Usuario mostrarMenuRegistro() {
     cout << "Contrasenya: ";
     cin >> contrasena;
     nuevoUsuario.setContrasena_usuario(contrasena);
-
-    cout << "Nivel: ";
-    cin >> nivel;
-    nuevoUsuario.setNivel(nivel);
 
     cout << "Direccion: ";
     cin.ignore(); // Limpiar buffer antes de getline
@@ -142,7 +139,7 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
 
         if (opcion == 1)
         {
-            cout << "\n\nMostrar catalogo\n";
+            mostrarProductos(usuario_actual);
             break;
         } else if (opcion == 2)
         {
@@ -160,6 +157,30 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
     }
 }
 
+void mostrarProductos(Usuario usuario_actual) {
+    int opcion;
+    cout << endl << "PRODUCTOS" << endl;
+
+    vector<Producto> productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
+
+    for (int i = 0; i < productos.size(); i++) {
+        cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
+    }
+
+    cout << endl << "Pulsa 1 para volver al menu principal: ";
+    cin >> opcion;
+
+    cout << endl;
+
+    if (opcion == 1)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
+    
+    
+
+}
+
 void mostrarMenuMiPerfil(Usuario usuario_actual) {
     int opcion;
 
@@ -167,7 +188,6 @@ void mostrarMenuMiPerfil(Usuario usuario_actual) {
 
     // Visualizar datos del usuario actual
     cout << "Nombre de usuario: " << usuario_actual.getNombre_usuario() << endl;
-    cout << "Nivel: " << usuario_actual.getNivel() << endl;
     cout << "Direccion: " << usuario_actual.getDireccion() << endl;
     cout << "Email: " << usuario_actual.getContacto_usuario() << endl;
     cout << "Subscripcion: " << usuario_actual.getId_subscripcion() << endl;

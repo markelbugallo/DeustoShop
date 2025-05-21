@@ -1,6 +1,18 @@
 #include "Usuario.h"
 
-// constructor
+// constructor vacio
+Usuario::Usuario()
+    : id_usuario(0),
+    nombre_usuario(""),
+    contrasena_usuario(""),
+    contacto_usuario(""),
+    id_subscripcion(0),
+    direccion(""),
+    codigo_postal(0)
+{
+}
+
+// con parametros
 Usuario::Usuario(
     int id_usuario,
     const string &nombre_usuario, 

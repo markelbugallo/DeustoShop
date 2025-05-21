@@ -10,7 +10,7 @@ private:
     string descripcion;
     double precio;
     int id_proveedor;
-    int categoria;
+    string categoria;
 public:
     Producto();
     Producto(
@@ -19,7 +19,7 @@ public:
         const string &descripcion,
         double precio,
         int id_proveedor,
-        int categoria
+        const string &categoria
     );
 
     int getId_producto() const;
@@ -27,7 +27,7 @@ public:
     string getDescripcion() const;
     double getPrecio() const;
     int getId_proveedor() const;
-    int getCategoria() const;
+    string getCategoria() const;
 };
 
 #endif // PRODUCTO_H

@@ -6,6 +6,7 @@
 void mostrarMenuInicial();
 Usuario mostrarMenuRegistro();
 void mostrarMenuPrincipal(Usuario usuario);
+void mostrarProductos(Usuario usuario);
 void mostrarMenuMiPerfil(Usuario usuario);
 int mandarAlSevidor(const string &mensaje, string &respuesta);
 

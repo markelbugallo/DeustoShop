@@ -1,12 +1,13 @@
 #include "Producto.h"
 
 // constructor
-Producto::Producto(int id_producto,
+Producto::Producto(
+    int id_producto,
     const string &nombre_producto,
     const string &descripcion,
     double precio,
     int id_proveedor,
-    int categoria
+    const string &categoria
 ) : id_producto(id_producto), nombre_producto(nombre_producto), descripcion(descripcion), precio(precio), id_proveedor(id_proveedor), categoria(categoria) {}
 
 
@@ -31,6 +32,6 @@ int Producto::getId_proveedor() const {
     return id_proveedor;
 }
 
-int Producto::getCategoria() const {
+string Producto::getCategoria() const {
     return categoria;
 }
