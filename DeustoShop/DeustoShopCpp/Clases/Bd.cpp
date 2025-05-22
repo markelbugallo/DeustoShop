@@ -1,6 +1,7 @@
 #include "Bd.h"
 #include "Almacen.h"
 #include "Producto.h"
+#include "Pedido.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,7 +14,7 @@ vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
 
     ifstream file(fichero);
     if (!file.is_open()) {
-        cout << "No se pudo abrir el archivo: " << fichero;
+        cout << "No se pudo abrir el archivo: " << fichero << endl;
         return almacenes;
     }
 
@@ -49,13 +50,71 @@ vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
     return almacenes;
 }
 
+vector<Pedido> cargarPedidosCSV(const string &fichero) {
+    vector<Pedido> pedidos;
+    string line;
+
+    ifstream file(fichero);
+    if (!file.is_open()) {
+        cout << "No se pudo abrir el fichero: " << fichero << endl;
+        return pedidos;
+    }
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string id_pedidoStr, fecha_pedidoStr, estado_pedido, id_usuarioStr, productosCantidadesStr, direccion, codigo_postalStr;
+
+        getline(ss, id_pedidoStr, ';');
+        getline(ss, fecha_pedidoStr, ';');
+        getline(ss, estado_pedido, ';');
+        getline(ss, id_usuarioStr, ';');
+        getline(ss, productosCantidadesStr, ';');
+        getline(ss, direccion, ';');
+        getline(ss, codigo_postalStr, ';');
+
+        try
+        {
+            int id_pedido = stoi(id_pedidoStr);
+            Fecha fecha_pedido = Fecha::parse(fecha_pedidoStr);
+            int id_usuario = stoi(id_usuarioStr);
+            int codigo_Postal = stoi(codigo_postalStr);
+
+            map<int, int> productosCantidades;
+            stringstream mp(productosCantidadesStr);
+            string conjunto;
+
+            while (getline(mp, conjunto, ',')) {
+                auto pos = conjunto.find(':');
+                if (pos == string::npos) continue;
+                int idProducto = stoi(conjunto.substr(0, pos));
+                int cantidad = stoi(conjunto.substr(pos+1));
+                productosCantidades[idProducto] = cantidad;
+            }
+
+            Pedido pe(id_pedido, fecha_pedido, estado_pedido, id_usuario, productosCantidades, direccion, codigo_Postal);
+            pedidos.push_back(pe);
+        
+        } catch (const invalid_argument &e) {
+            cout << "Error de formato en linea: \"" << line << "\" -> "
+                 << e.what() << endl;
+        }
+        catch (const out_of_range &e) {
+            cout << "Valor fuera de rango en linea: \"" << line << "\" -> "
+                 << e.what() << endl;
+        }
+    }
+    
+    file.close();
+    return pedidos;
+}
+
 vector<Producto> cargarProductosCSV(const string &fichero) {
     vector<Producto> productos;
     string line;
 
     ifstream file(fichero);
     if (!file.is_open()) {
-        cout << "No se pudo abrir el archivo: " << fichero;
+        cout << "No se pudo abrir el archivo: " << fichero << endl;
         return productos;
     }
 

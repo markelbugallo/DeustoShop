@@ -1,6 +1,7 @@
 #ifndef PEDIDO_H
 #define PEDIDO_H
 #include <string>
+#include <sstream>
 #include <map>
 using namespace std;
 
@@ -9,6 +10,17 @@ struct Fecha
     int dia;
     int mes;
     int anyo;
+
+    // Parsea formato "YYYY-MM-DD"
+    static Fecha parse(const string &s) {
+        Fecha f;
+        char sep1, sep2;
+        istringstream is(s);
+        if (!(is >> f.anyo >> sep1 >> f.mes >> sep2 >> f.dia) || sep1 != '-' || sep2 != '-') {
+            throw invalid_argument("Formato de fecha inválido: " + s);
+        }
+        return f;
+    }
 };
 
 

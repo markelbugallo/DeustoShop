@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <winsock2.h>
+#include <sstream>
 #include "Menus-cliente.h"
 #include "../Clases/Usuario.h"
 #include "../Clases/Bd.h"
@@ -89,7 +90,7 @@ void mostrarMenuInicial() {
 Usuario mostrarMenuRegistro() {
     // variables para almacenar la entrada del usuario
     string nombre_usu, contrasena, direccion, email;
-    int tipo_subscripcion, codigo_postal;
+    int tipo_subscripcion, codigo_postal, id_usuario;
 
     // variable para añadir el usuario nuevo con las variables introducidas por el usuario
     Usuario nuevoUsuario;
@@ -121,6 +122,12 @@ Usuario mostrarMenuRegistro() {
     cin >> codigo_postal;
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
+    // el id se asigna automaticamente te pone +1 al ultimo registrado
+    cout << "ID: ";
+    cin >> id_usuario;
+    nuevoUsuario.setId_usuario(id_usuario);
+
+
     return nuevoUsuario;
 }
 
@@ -143,7 +150,7 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
             break;
         } else if (opcion == 2)
         {
-            cout << "\n\nMostrar historial de compras\n";
+            mostrarHistorialCompras(usuario_actual);
             break;
         } else if (opcion == 3)
         {
@@ -163,7 +170,7 @@ void mostrarProductos(Usuario usuario_actual) {
 
     vector<Producto> productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
 
-    for (int i = 0; i < productos.size(); i++) {
+    for (size_t i = 0; i < productos.size(); i++) {
         cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
     }
 
@@ -177,8 +184,34 @@ void mostrarProductos(Usuario usuario_actual) {
         mostrarMenuPrincipal(usuario_actual);
     }
     
-    
+}
 
+void mostrarHistorialCompras(Usuario usuario_actual) {
+    int opcion;
+    cout << endl << endl << "Pedidos de " << usuario_actual.getNombre_usuario() << endl;
+    vector<Pedido> pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
+
+    for (size_t i = 0; i < pedidos.size(); i++)
+    {
+        if (pedidos[i].getId_usuario() == usuario_actual.getId_usuario()) {
+            cout << "-------------------------------------------------------------" << endl;
+            cout << "Numero de pedido: " << pedidos[i].getId_pedido() << "          "  << "Estado del envio: " << pedidos[i].getEstado_pedido() << endl << endl;
+            cout << "Id del producto " << "                                  " << "Cantidades" << endl; 
+            for (const auto &conjunto : pedidos[i].getProductosCantidades()) {
+                cout << conjunto.first << "......................................................." << conjunto.second << endl;
+            }
+            cout << "-------------------------------------------------------------" << endl << endl << endl;
+        }
+    }
+
+    cout << endl << "Pulsa 1 para volver al menu principal: ";
+    cin >> opcion;
+
+    cout << endl;
+    if (opcion == 1)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
 }
 
 void mostrarMenuMiPerfil(Usuario usuario_actual) {
