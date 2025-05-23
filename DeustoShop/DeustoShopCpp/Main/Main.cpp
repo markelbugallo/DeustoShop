@@ -3,7 +3,8 @@
 using namespace std;
 
 int main(void) {
-    mostrarMenuInicial();
+    MenusCliente menu;
+    menu.mostrarMenuInicial();
 }
 
 

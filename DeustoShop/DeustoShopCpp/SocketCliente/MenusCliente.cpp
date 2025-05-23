@@ -10,8 +10,19 @@ using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+void MenusCliente::cargarDatos() {
+    // vaciar listas
+    almacenes.clear();
+    pedidos.clear();
+    productos.clear();
 
-int mandarAlServidor(const string &mensaje, string &respuesta) {
+    // volver a cargar
+    almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
+    pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
+    productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
+}
+
+int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
     WSADATA wsaData;
 	SOCKET s;
 	struct sockaddr_in server;
@@ -53,9 +64,12 @@ int mandarAlServidor(const string &mensaje, string &respuesta) {
     return 0;
 }
 
-void mostrarMenuInicial() {
+void MenusCliente::mostrarMenuInicial() {
     int opcion = 0;
     Usuario usuario_actual;
+
+    // llamada a funcion para que cargue los datos
+    cargarDatos();
 
     while (true)
     {
@@ -88,7 +102,7 @@ void mostrarMenuInicial() {
     }
 }
 
-Usuario mostrarMenuRegistro() {
+Usuario MenusCliente::mostrarMenuRegistro() {
     // variables para almacenar la entrada del usuario
     string nombre_usu, contrasena, direccion, email;
     int tipo_subscripcion, codigo_postal, id_usuario;
@@ -132,7 +146,7 @@ Usuario mostrarMenuRegistro() {
     return nuevoUsuario;
 }
 
-void mostrarMenuPrincipal(Usuario usuario_actual) {
+void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     int opcion = 0;
 
     while (true)
@@ -164,12 +178,13 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
         } else if (opcion == 5)
         {
             cout << "\nCerrando sesion...\n\n";
+            mostrarMenuInicial();
             break;
         }
     }
 }
 
-void mostrarProductos(Usuario usuario_actual) {
+void MenusCliente::mostrarProductos(Usuario usuario_actual) {
     int opcion;
     cout << endl << "PRODUCTOS" << endl;
 
@@ -191,7 +206,7 @@ void mostrarProductos(Usuario usuario_actual) {
     
 }
 
-void mostrarHistorialCompras(Usuario usuario_actual) {
+void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
     int opcion;
     cout << endl << endl << "Pedidos de " << usuario_actual.getNombre_usuario() << endl;
     vector<Pedido> pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
@@ -215,7 +230,7 @@ void mostrarHistorialCompras(Usuario usuario_actual) {
     }
 }
 
-void mostrarAlmacenes(Usuario usuario_actual) {
+void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
     int opcion;
     cout << endl << "ALMACENES" << endl;
     vector<Almacen> almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
@@ -236,7 +251,7 @@ void mostrarAlmacenes(Usuario usuario_actual) {
     
 }
 
-void mostrarMenuMiPerfil(Usuario usuario_actual) {
+void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
     int opcion;
 
     cout << "\n\nMI PERFIL\n" << "---------" << endl;
