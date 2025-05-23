@@ -95,6 +95,7 @@ void MenusCliente::mostrarMenuInicial() {
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
+            exit(0);
             break;
         }
 
@@ -188,8 +189,6 @@ void MenusCliente::mostrarProductos(Usuario usuario_actual) {
     int opcion;
     cout << endl << "PRODUCTOS" << endl;
 
-    vector<Producto> productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
-
     for (size_t i = 0; i < productos.size(); i++) {
         cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
     }
@@ -209,7 +208,6 @@ void MenusCliente::mostrarProductos(Usuario usuario_actual) {
 void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
     int opcion;
     cout << endl << endl << "Pedidos de " << usuario_actual.getNombre_usuario() << endl;
-    vector<Pedido> pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
 
     for (size_t i = 0; i < pedidos.size(); i++)
     {
@@ -233,7 +231,6 @@ void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
 void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
     int opcion;
     cout << endl << "ALMACENES" << endl;
-    vector<Almacen> almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
     
     for (size_t i = 0; i < almacenes.size(); i++)
     {
