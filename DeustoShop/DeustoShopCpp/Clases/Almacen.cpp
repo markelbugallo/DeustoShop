@@ -1,4 +1,6 @@
 #include "Almacen.h"
+#include <iostream>
+using namespace std;
 
 // constructor
 Almacen::Almacen(
@@ -29,4 +31,13 @@ string Almacen::getDireccion() const {
 
 int Almacen::getPostal() const {
     return postal;
+}
+
+void Almacen::imprimirAlmacen() {
+    cout << "---------------------------------------------------" << endl;
+    cout << "ID Almacen: " << id << endl;
+    cout << "Nombre del almacen: " << nombre << endl;
+    cout << "Email: " << contacto << endl;
+    cout << "Direccion: " << direccion << ", " << postal << endl;
+    cout << "---------------------------------------------------" << endl << endl;
 }

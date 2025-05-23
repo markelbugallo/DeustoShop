@@ -1,6 +1,7 @@
 #ifndef ALMACEN_H
 #define ALMACEN_H
 #include <string>
+#include "Usuario.h"
 using namespace std;
 
 class Almacen
@@ -22,11 +23,15 @@ public:
         int postal
     );
 
+    // getters
     int getId() const;
     string getNombre() const;
     string getContacto() const;
     string getDireccion() const;
     int getPostal() const;
+
+    // funciones
+    void imprimirAlmacen();
     
 };
 

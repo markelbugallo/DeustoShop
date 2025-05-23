@@ -5,6 +5,7 @@
 #include "Menus-cliente.h"
 #include "../Clases/Usuario.h"
 #include "../Clases/Bd.h"
+#include "../Clases/Almacen.h"
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -139,8 +140,9 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
         cout << "\nMENU PRINCIPAL\n";
         cout << "1) Catalogo de productos\n";
         cout << "2) Historial de compras\n";
-        cout << "3) Mi perfil\n";
-        cout << "4) Salir\n\n";
+        cout << "3) Mostrar almacenes\n";
+        cout << "4) Mi perfil\n";
+        cout << "5) Salir\n\n";
         cout << "Elija una opcion: ";
         cin >> opcion;
 
@@ -154,9 +156,12 @@ void mostrarMenuPrincipal(Usuario usuario_actual) {
             break;
         } else if (opcion == 3)
         {
+            mostrarAlmacenes(usuario_actual);
+        } else if (opcion == 4)
+        {
             mostrarMenuMiPerfil(usuario_actual);
             break;
-        } else if (opcion == 4)
+        } else if (opcion == 5)
         {
             cout << "\nCerrando sesion...\n\n";
             break;
@@ -194,18 +199,9 @@ void mostrarHistorialCompras(Usuario usuario_actual) {
     for (size_t i = 0; i < pedidos.size(); i++)
     {
         if (pedidos[i].getId_usuario() == usuario_actual.getId_usuario()) {
-            // Mostrar solo los pedidos del usuario actual
-            //Falta llamar a la funcion de imprimir, que no se como hacerlo
-            pedidos[i].imprimirInfPedido(usuario_actual);
-            /*
-            cout << "-------------------------------------------------------------" << endl;
-            cout << "Numero de pedido: " << pedidos[i].getId_pedido() << "          "  << "Estado del envio: " << pedidos[i].getEstado_pedido() << endl << endl;
-            cout << "Id del producto " << "                                  " << "Cantidades" << endl; 
-            for (const auto &conjunto : pedidos[i].getProductosCantidades()) {
-                cout << conjunto.first << "......................................................." << conjunto.second << endl;
-            }
-            cout << "-------------------------------------------------------------" << endl << endl << endl;
-        */
+
+            pedidos[i].imprimirInfPedido();
+            
             }
     }
 
@@ -219,13 +215,34 @@ void mostrarHistorialCompras(Usuario usuario_actual) {
     }
 }
 
+void mostrarAlmacenes(Usuario usuario_actual) {
+    int opcion;
+    cout << endl << "ALMACENES" << endl;
+    vector<Almacen> almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
+    
+    for (size_t i = 0; i < almacenes.size(); i++)
+    {
+        almacenes[i].imprimirAlmacen();
+    }
+
+    cout << endl << "Pulsa 1 para volver al menu principal: ";
+    cin >> opcion;
+
+    cout << endl;
+    if (opcion == 1)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
+    
+}
+
 void mostrarMenuMiPerfil(Usuario usuario_actual) {
     int opcion;
 
     cout << "\n\nMI PERFIL\n" << "---------" << endl;
 
     // Visualizar datos del usuario actual
-    usuario_actual.imprimir(usuario_actual);
+    usuario_actual.imprimirUsuario(usuario_actual);
 
 
     // Funcionalidades
