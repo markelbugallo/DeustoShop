@@ -3,6 +3,7 @@
 #include <string>
 using namespace std;
 
+
 class Proveedor
 {
 private:
@@ -20,6 +21,7 @@ public:
     int getId_proveedor() const;
     string getNombre_proveedor() const;
     string getContacto_proveedor() const;
+    void imprimirInfProveedor();
 };
 
 

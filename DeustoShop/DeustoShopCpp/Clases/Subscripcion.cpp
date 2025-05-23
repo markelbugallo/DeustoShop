@@ -1,4 +1,8 @@
 #include "Subscripcion.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
 
 // constructor
 Subscripcion::Subscripcion(
@@ -18,4 +22,11 @@ string Subscripcion::getTipo() const {
 
 int Subscripcion::getDescuento() const {
     return descuento;
+}
+void Subscripcion::imprimirInfSubscripcion(Usuario usuarioActual) {
+    cout << "-------------------------------------------------------------" << endl;
+    cout << "ID de subscripcion: " << id_subscripcion << endl;
+    cout << "Tipo de subscripcion: " << tipo << endl;
+    cout << "Descuento: " << descuento << "%" << endl;
+    cout << "-------------------------------------------------------------" << endl;
 }

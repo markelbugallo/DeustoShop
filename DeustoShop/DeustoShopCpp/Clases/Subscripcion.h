@@ -2,6 +2,7 @@
 #define SUBSCRIPCION_H
 #include <string>
 using namespace std;
+#include "Usuario.h"
 
 class Subscripcion{
 private:
@@ -19,6 +20,9 @@ public:
     int getId_subscripcion() const;
     string getTipo() const;
     int getDescuento() const;
+    void imprimirInfSubscripcion(Usuario usuarioActual);
+       
+    
 };
 
 #endif // SUBSCRIPCION_H

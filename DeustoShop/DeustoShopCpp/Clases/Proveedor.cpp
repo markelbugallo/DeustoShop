@@ -1,4 +1,7 @@
 #include "Proveedor.h"
+#include <iostream>
+#include <string>
+using namespace std;
 
 // constructor
 Proveedor::Proveedor(
@@ -18,4 +21,11 @@ string Proveedor::getNombre_proveedor() const {
 
 string Proveedor::getContacto_proveedor() const {
     return contacto_proveedor;
+}
+void Proveedor::imprimirInfProveedor() {
+    cout << "-------------------------------------------------------------" << endl;
+    cout << "ID de proveedor: " << id_proveedor << endl;
+    cout << "Nombre de proveedor: " << nombre_proveedor << endl;
+    cout << "Contacto de proveedor: " << contacto_proveedor << endl;
+    cout << "-------------------------------------------------------------" << endl;
 }
