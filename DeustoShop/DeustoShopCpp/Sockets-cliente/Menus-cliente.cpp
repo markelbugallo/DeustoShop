@@ -194,6 +194,10 @@ void mostrarHistorialCompras(Usuario usuario_actual) {
     for (size_t i = 0; i < pedidos.size(); i++)
     {
         if (pedidos[i].getId_usuario() == usuario_actual.getId_usuario()) {
+            // Mostrar solo los pedidos del usuario actual
+            //Falta llamar a la funcion de imprimir, que no se como hacerlo
+            pedidos[i].imprimirInfPedido(usuario_actual);
+            /*
             cout << "-------------------------------------------------------------" << endl;
             cout << "Numero de pedido: " << pedidos[i].getId_pedido() << "          "  << "Estado del envio: " << pedidos[i].getEstado_pedido() << endl << endl;
             cout << "Id del producto " << "                                  " << "Cantidades" << endl; 
@@ -201,7 +205,8 @@ void mostrarHistorialCompras(Usuario usuario_actual) {
                 cout << conjunto.first << "......................................................." << conjunto.second << endl;
             }
             cout << "-------------------------------------------------------------" << endl << endl << endl;
-        }
+        */
+            }
     }
 
     cout << endl << "Pulsa 1 para volver al menu principal: ";
@@ -220,11 +225,8 @@ void mostrarMenuMiPerfil(Usuario usuario_actual) {
     cout << "\n\nMI PERFIL\n" << "---------" << endl;
 
     // Visualizar datos del usuario actual
-    cout << "Nombre de usuario: " << usuario_actual.getNombre_usuario() << endl;
-    cout << "Direccion: " << usuario_actual.getDireccion() << endl;
-    cout << "Email: " << usuario_actual.getContacto_usuario() << endl;
-    cout << "Subscripcion: " << usuario_actual.getId_subscripcion() << endl;
-    cout << "Codigo Postal: " << usuario_actual.getCodigo_postal() << endl;
+    usuario_actual.imprimir(usuario_actual);
+
 
     // Funcionalidades
     cout <<  endl << "1) Modificar datos" << endl;

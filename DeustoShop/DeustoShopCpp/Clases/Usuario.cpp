@@ -1,4 +1,7 @@
 #include "Usuario.h"
+using namespace std;
+#include <iostream>
+#include <string>
 
 // constructor vacio
 Usuario::Usuario()
@@ -80,4 +83,13 @@ void Usuario::setDireccion(const std::string& dir) {
 
 void Usuario::setCodigo_postal(int cp) {
     codigo_postal = cp;
+}
+void Usuario::imprimir(Usuario usuarioactual) {
+    cout << "ID: " << usuarioactual.getId_usuario() << endl;
+    cout << "Nombre de usuario: " << usuarioactual.getNombre_usuario() << endl;
+    cout << "Contrasenya: " << usuarioactual.getContrasena_usuario() << endl;
+    cout << "Direccion: " << usuarioactual.getDireccion() << endl;
+    cout << "Email: " << usuarioactual.getContacto_usuario() << endl;
+    cout << "Tipo de subscripcion: " << usuarioactual.getId_subscripcion() << endl;
+    cout << "Codigo Postal: " << usuarioactual.getCodigo_postal() << endl;
 }

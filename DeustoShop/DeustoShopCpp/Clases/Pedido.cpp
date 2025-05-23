@@ -1,4 +1,8 @@
 #include "Pedido.h"
+#include <iostream>
+#include <string>
+using namespace std;
+#include "Usuario.h"
 
 // constructor
 Pedido::Pedido(
@@ -38,4 +42,13 @@ string Pedido::getDireccion() const {
 
 int Pedido::getCodigo_Postal() const {
     return codigo_Postal;
+}
+void Pedido::imprimirInfPedido(Usuario usuarioactual) {
+    cout << "-------------------------------------------------------------" << endl;
+    cout << "Numero de pedido: " << id_pedido << "          "  << "Estado del envio: " << estado_pedido << endl << endl;
+    cout << "Id del producto " << "                                  " << "Cantidades" << endl; 
+    for (const auto &conjunto : productosCantidades) {
+        cout << conjunto.first << "......................................................." << conjunto.second << endl;
+    }
+    cout << "-------------------------------------------------------------" << endl;
 }
