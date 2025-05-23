@@ -4,7 +4,7 @@
 #include <sstream>
 #include "Menus-cliente.h"
 #include "../Clases/Usuario.h"
-#include "../Clases/Bd.h"
+#include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
 using namespace std;
 #define SERVER_IP "127.0.0.1"

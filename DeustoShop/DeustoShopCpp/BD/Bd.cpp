@@ -1,7 +1,7 @@
 #include "Bd.h"
-#include "Almacen.h"
-#include "Producto.h"
-#include "Pedido.h"
+#include "../Clases/Almacen.h"
+#include "../Clases/Producto.h"
+#include "../Clases/Pedido.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
