@@ -131,26 +131,34 @@ void Usuario::guardarUsuariosCSV(const string& filename, const vector<Usuario>& 
              << u.getCodigo_postal() << "\n";
     }
 }
-    void Usuario::modificarUsuarioPorId(vector<Usuario>& usuarios, int id_usuario) {
-        for (auto& u : usuarios) {
-            if (u.getId_usuario() == id_usuario) {
-                string nuevoNombre, nuevaContrasena, nuevoContacto, nuevaDireccion;
-                int nuevaSubscripcion, nuevoCP;
-                cout << "Nuevo nombre: "; cin >> nuevoNombre;
-                cout << "Nueva contraseña: "; cin >> nuevaContrasena;
-                cout << "Nuevo contacto: "; cin >> nuevoContacto;
-                cout << "Nuevo id_subscripcion: "; cin >> nuevaSubscripcion;
-                cout << "Nueva direccion: "; cin >> nuevaDireccion;
-                cout << "Nuevo codigo postal: "; cin >> nuevoCP;
-                u.setNombre_usuario(nuevoNombre);
-                u.setContrasena_usuario(nuevaContrasena);
-                u.setContacto_usuario(nuevoContacto);
-                u.setId_subscripcion(nuevaSubscripcion);
-                u.setDireccion(nuevaDireccion);
-                u.setCodigo_postal(nuevoCP);
-                cout << "Usuario modificado correctamente.\n";
-                return;
-            }
-        }
-        cout << "Usuario no encontrado.\n";
-    }
+void Usuario::modificarUsuarioPorId(Usuario usuarioActual) {
+    string input;
+    cout << "Modificar usuario (deja en blanco para mantener el valor actual):\n";
+
+    cout << "Nombre actual: " << usuarioActual.getNombre_usuario() << "\nNuevo nombre: ";
+    cin.ignore();
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setNombre_usuario(input);
+
+    cout << "Contrasena actual: " << usuarioActual.getContrasena_usuario() << "\nNueva contrasena: ";
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setContrasena_usuario(input);
+
+    cout << "Contacto actual: " << usuarioActual.getContacto_usuario() << "\nNuevo contacto: ";
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setContacto_usuario(input);
+
+    cout << "ID subscripcion actual: " << usuarioActual.getId_subscripcion() << "\nNuevo id_subscripcion: ";
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setId_subscripcion(stoi(input));
+
+    cout << "Direccion actual: " << usuarioActual.getDireccion() << "\nNueva direccion: ";
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setDireccion(input);
+
+    cout << "Codigo postal actual: " << usuarioActual.getCodigo_postal() << "\nNuevo codigo postal: ";
+    getline(cin, input);
+    if (!input.empty()) usuarioActual.setCodigo_postal(stoi(input));
+
+    cout << "Usuario modificado correctamente.\n";
+}

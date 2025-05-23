@@ -268,6 +268,8 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
     {
         cout << "Modificar datos" << endl;
         mostrarMenuMiPerfil(usuario_actual);
+        // modificarUsuarioPorId(usuario_actual); // Function not implemented, call removed to avoid error
+        usuario_actual.modificarUsuarioPorId( usuario_actual);
     } else if (opcion == 2)
     {
         cout << "Eliminar perfil" << endl;
