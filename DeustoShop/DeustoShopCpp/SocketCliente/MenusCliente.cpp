@@ -298,15 +298,15 @@ void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
             {
                 cout << p.getId_producto() << " " << p.getNombre_producto() << " " << p.getPrecio() << endl;
             }
-        }
+            }
 
-        cout << "\nDesea ver alguna categoria mas? (s/n): ";
-        cin >> pregunta;
+            cout << "\nDesea ver alguna categoria mas? (s/n): ";
+            cin >> pregunta;
 
-        if (pregunta == "n")
-        {
-            break;
-        }
+            if (pregunta == "n")
+            {
+                break;
+            }
         }
     }
 
