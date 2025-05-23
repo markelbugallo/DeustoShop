@@ -42,6 +42,7 @@ public:
     void setId_subscripcion(int id_sub);
     void setDireccion(const string &dir);
     void setCodigo_postal(int cp);
+    void imprimir(Usuario usuarioactual);
 
 };
 
