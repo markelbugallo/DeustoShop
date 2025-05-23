@@ -6,6 +6,7 @@
 #include "../Clases/Usuario.h"
 #include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
+#include <set>
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -206,54 +207,60 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     int opcion = 0;
 
-    while (true)
-    {
-        cout << "\nMENU PRINCIPAL\n";
-        cout << "1) Catalogo de productos\n";
-        cout << "2) Historial de compras\n";
-        cout << "3) Mostrar almacenes\n";
-        cout << "4) Mi perfil\n";
-        cout << "5) Salir\n\n";
-        cout << "Elija una opcion: ";
-        cin >> opcion;
+    cout << "\nMENU PRINCIPAL\n";
+    cout << "1) Catalogo de productos\n";
+    cout << "2) Historial de compras\n";
+    cout << "3) Mostrar almacenes\n";
+    cout << "4) Mi perfil\n";
+    cout << "5) Salir\n\n";
+    cout << "Elija una opcion: ";
+    cin >> opcion;
 
-        if (opcion == 1)
-        {
-            mostrarProductos(usuario_actual);
-            break;
-        } else if (opcion == 2)
-        {
-            mostrarHistorialCompras(usuario_actual);
-            break;
-        } else if (opcion == 3)
-        {
-            mostrarAlmacenes(usuario_actual);
-        } else if (opcion == 4)
-        {
-            mostrarMenuMiPerfil(usuario_actual);
-            break;
-        } else if (opcion == 5)
-        {
-            cout << "\nCerrando sesion...\n\n";
-            mostrarMenuInicial();
-            break;
-        }
+    if (opcion == 1)
+    {
+        mostrarMenuProductos(usuario_actual);
+    } else if (opcion == 2)
+    {
+        mostrarHistorialCompras(usuario_actual);
+    } else if (opcion == 3)
+    {
+        mostrarAlmacenes(usuario_actual);
+    } else if (opcion == 4)
+    {
+        mostrarMenuMiPerfil(usuario_actual);
+    } else if (opcion == 5)
+    {
+        cout << "\nCerrando sesion...\n\n";
+        mostrarMenuInicial();
     }
+    
 }
 
 void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     int opcion;
     cout << endl << "MENU DE PRODUCTOS" << endl;
     cout << "1) Mostrar todos los productos\n";
-    cout << "2) Mostrar de una categoria especifica\n";
-    cout << "5) Volver al menu principal\n\n";
+    cout << "2) Mostrar productos de una categoria especifica\n";
+    cout << "3) Volver al menu principal\n\n";
     cout << "Elija una opcion: ";
     cin >> opcion;
+
+
+    if (opcion == 1)
+    {
+        mostrarTodosLosProductos(usuario_actual);
+    } else if (opcion == 2)
+    {
+        mostrarProductosPorCategoria(usuario_actual);
+    } else if (opcion == 3)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
 }
 
-void MenusCliente::mostrarProductos(Usuario usuario_actual) {
+void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
     int opcion;
-    cout << endl << "PRODUCTOS" << endl;
+    cout << endl << "TODOS LOS PRODUCTOS" << endl;
 
     for (size_t i = 0; i < productos.size(); i++) {
         cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
@@ -268,7 +275,50 @@ void MenusCliente::mostrarProductos(Usuario usuario_actual) {
     {
         mostrarMenuPrincipal(usuario_actual);
     }
-    
+}
+
+void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
+    int opcion;
+    string pregunta;
+    string eleccion;
+    set<string> categoriasDisponibles = {"JUGUETERIA", "HOGAR", "ROPA", "ELECTRONICA", "ALIMENTACION", "LIBRERIA", "DEPORTE", "OTROS"};
+
+    while (true)
+    {
+        cout << endl << endl << "Categorias disponibles: \nJUGUETERIA\nHOGAR\nROPA\nELECTRONICA\nALIMENTACION\nLIBRERIA\nDEPORTE\nOTROS\nSeleccione una opcion (mayusculas necesarias): ";
+        cin >> eleccion;
+        cout << endl;
+
+        if (categoriasDisponibles.find(eleccion) == categoriasDisponibles.end())
+        {
+            cout << "La opcion es incorrecta, pruebe de nuevo";
+        } else {
+            for (Producto p : productos) {
+            if (p.getCategoria() == eleccion)
+            {
+                cout << p.getId_producto() << " " << p.getNombre_producto() << " " << p.getPrecio() << endl;
+            }
+        }
+
+        cout << "\nDesea ver alguna categoria mas? (s/n): ";
+        cin >> pregunta;
+
+        if (pregunta == "n")
+        {
+            break;
+        }
+        }
+    }
+
+    cout << endl << "Pulsa 1 para volver al menu principal: ";
+    cin >> opcion;
+
+    cout << endl;
+
+    if (opcion == 1)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
 }
 
 void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {

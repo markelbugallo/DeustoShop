@@ -27,7 +27,8 @@ public:
     Usuario mostrarMenuInicioSesion();
     void mostrarMenuPrincipal(Usuario usuario);
     void mostrarMenuProductos(Usuario usuario);
-    void mostrarProductos(Usuario usuario);
+    void mostrarTodosLosProductos(Usuario usuario);
+    void mostrarProductosPorCategoria(Usuario usuario);
     void mostrarHistorialCompras(Usuario usuario);
     void mostrarAlmacenes(Usuario usuario);
     void mostrarMenuMiPerfil(Usuario usuario);
