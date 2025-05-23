@@ -16,11 +16,26 @@ void MenusCliente::cargarDatos() {
     almacenes.clear();
     pedidos.clear();
     productos.clear();
+    proveedores.clear();
+    subscripciones.clear();
+    usuarios.clear();
 
     // volver a cargar
     almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
     pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
     productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
+    proveedores = cargarProveedoresCSV("../DeustoShopC/Data/proveedores.csv");
+    subscripciones  = cargarSubscripcionesCSV("../DeustoShopC/Data/Subscripciones.csv");
+    usuarios = cargarUsuariosCSV("../DeustoShopC/Data/usuarios.csv");
+
+    // usuarios y contraseñas
+    for (size_t i = 0; i < usuarios.size(); i++)
+    {
+        if (usuariosContrasenas.find((usuarios[i].getNombre_usuario())) == usuariosContrasenas.end())
+        {
+            usuariosContrasenas[usuarios[i].getNombre_usuario()] = usuarios[i].getContrasena_usuario();
+        }
+    }   
 }
 
 int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
@@ -87,12 +102,15 @@ void MenusCliente::mostrarMenuInicial() {
             false;
         } else if (opcion == 2)
         {
-            cout << "\n\nProbando server...\n\n";
+            /*cout << "\n\nProbando server...\n\n";
             string respuesta;
-            if (mandarAlServidor("VerPERFIL", respuesta) == 0)
+            if (mandarAlServidor("INICIAR SESION", respuesta) == 0)
             {
-                //mostrarMenuPrincipal();
-            }
+                
+            }*/
+
+            usuario_actual = mostrarMenuInicioSesion();
+            false;
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
@@ -140,12 +158,49 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
     // el id se asigna automaticamente te pone +1 al ultimo registrado
-    cout << "ID: ";
-    cin >> id_usuario;
-    nuevoUsuario.setId_usuario(id_usuario);
-
-
+    nuevoUsuario.setId_usuario(usuarios.size() + 1);
     return nuevoUsuario;
+}
+
+Usuario MenusCliente::mostrarMenuInicioSesion() {
+    // variables para almacenar respuestas del usuario
+    Usuario usuario_actual;
+    string nombre;
+    string contra;
+
+    while (true)
+    {
+        // pedir datos al usuario
+        cout << "\n\nNombre de usuario: ";
+        cin >> nombre;
+
+        if (usuariosContrasenas.find(nombre) == usuariosContrasenas.end())
+        {
+            cout << endl << "Ese nombre de usuario no esta registrado." << endl;
+        } else {
+            cout << endl << "Contrasenya: ";
+            cin >> contra;
+
+            if (usuariosContrasenas[nombre] != contra)
+            {
+                cout << endl << "Contrasenya incorrecta" << endl;
+            } else {
+                cout << endl << "Inicio de sesion correcto" << endl << endl;
+                break;
+            }
+        }
+    }
+    
+
+    // el usuario esta registrado, buscar cual son todos sus datos
+    for (Usuario u : usuarios) {
+        if (u.getNombre_usuario() == nombre && u.getContrasena_usuario() == contra)
+        {
+            usuario_actual = u;
+        }
+    }
+    
+    return usuario_actual;
 }
 
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
@@ -184,6 +239,16 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
             break;
         }
     }
+}
+
+void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
+    int opcion;
+    cout << endl << "MENU DE PRODUCTOS" << endl;
+    cout << "1) Mostrar todos los productos\n";
+    cout << "2) Mostrar de una categoria especifica\n";
+    cout << "5) Volver al menu principal\n\n";
+    cout << "Elija una opcion: ";
+    cin >> opcion;
 }
 
 void MenusCliente::mostrarProductos(Usuario usuario_actual) {

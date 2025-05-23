@@ -271,3 +271,5 @@ vector<Usuario> cargarUsuariosCSV(const string &fichero) {
     file.close();
     return usuarios;
 }
+
+map<string, string> usuariosContrasenas;
