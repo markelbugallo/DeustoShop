@@ -2,6 +2,10 @@
 using namespace std;
 #include <iostream>
 #include <string>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 // constructor vacio
 Usuario::Usuario()
@@ -93,3 +97,60 @@ void Usuario::imprimirUsuario(Usuario usuarioactual) {
     cout << "Tipo de subscripcion: " << usuarioactual.getId_subscripcion() << endl;
     cout << "Codigo Postal: " << usuarioactual.getCodigo_postal() << endl;
 }
+vector<Usuario> Usuario::cargarUsuariosCSV(const string& filename) {
+    vector<Usuario> usuarios;
+    ifstream file( "../DeustoShopC/Data/usuarios.csv");
+    string line;
+    getline(file, line); // Saltar cabecera
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string item;
+        vector<string> campos;
+        while (getline(ss, item, ',')) {
+            campos.push_back(item);
+        }
+        if (campos.size() == 7) {
+            usuarios.emplace_back(
+                stoi(campos[0]), campos[1], campos[2], campos[3],
+                stoi(campos[4]), campos[5], stoi(campos[6])
+            );
+        }
+    }
+    return usuarios;
+}
+void Usuario::guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios) {
+    ofstream file("../DeustoShopC/Data/usuarios.csv");
+    file << "id_usuario,nombre_usuario,contrasena_usuario,contacto_usuario,id_subscripcion,direccion,codigo_postal\n";
+    for (const auto& u : usuarios) {
+        file << u.getId_usuario() << ","
+             << u.getNombre_usuario() << ","
+             << u.getContrasena_usuario() << ","
+             << u.getContacto_usuario() << ","
+             << u.getId_subscripcion() << ","
+             << u.getDireccion() << ","
+             << u.getCodigo_postal() << "\n";
+    }
+}
+    void Usuario::modificarUsuarioPorId(vector<Usuario>& usuarios, int id_usuario) {
+        for (auto& u : usuarios) {
+            if (u.getId_usuario() == id_usuario) {
+                string nuevoNombre, nuevaContrasena, nuevoContacto, nuevaDireccion;
+                int nuevaSubscripcion, nuevoCP;
+                cout << "Nuevo nombre: "; cin >> nuevoNombre;
+                cout << "Nueva contraseña: "; cin >> nuevaContrasena;
+                cout << "Nuevo contacto: "; cin >> nuevoContacto;
+                cout << "Nuevo id_subscripcion: "; cin >> nuevaSubscripcion;
+                cout << "Nueva direccion: "; cin >> nuevaDireccion;
+                cout << "Nuevo codigo postal: "; cin >> nuevoCP;
+                u.setNombre_usuario(nuevoNombre);
+                u.setContrasena_usuario(nuevaContrasena);
+                u.setContacto_usuario(nuevoContacto);
+                u.setId_subscripcion(nuevaSubscripcion);
+                u.setDireccion(nuevaDireccion);
+                u.setCodigo_postal(nuevoCP);
+                cout << "Usuario modificado correctamente.\n";
+                return;
+            }
+        }
+        cout << "Usuario no encontrado.\n";
+    }

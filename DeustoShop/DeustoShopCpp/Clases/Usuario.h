@@ -1,6 +1,7 @@
 #ifndef USUARIO_H
 #define USUARIO_H
 #include <string>
+#include <vector>
 using namespace std;
 
 class Usuario {
@@ -45,6 +46,12 @@ public:
 
     // funciones
     void imprimirUsuario(Usuario usuarioactual);
+    // Carga un usuario desde un CSV
+      vector<Usuario> cargarUsuariosCSV(const string& filename);
+    // Modifica un usuario por ID
+     void modificarUsuarioPorId(vector<Usuario>& usuarios, int id_usuario);
+    // Guarda todos los usuarios en un CSV
+     void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios);
 
 };
 
