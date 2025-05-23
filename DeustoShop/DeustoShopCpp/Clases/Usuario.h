@@ -49,7 +49,7 @@ public:
     // Carga un usuario desde un CSV
       vector<Usuario> cargarUsuariosCSV(const string& filename);
     // Modifica un usuario por ID
-     void modificarUsuarioPorId(vector<Usuario>& usuarios, int id_usuario);
+    void modificarUsuarioPorId(Usuario& usuarioActual); 
     // Guarda todos los usuarios en un CSV
      void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios);
 

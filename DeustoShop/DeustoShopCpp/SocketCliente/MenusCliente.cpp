@@ -10,6 +10,7 @@ using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+
 void MenusCliente::cargarDatos() {
     // vaciar listas
     almacenes.clear();
@@ -268,8 +269,8 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
     {
         cout << "Modificar datos" << endl;
         mostrarMenuMiPerfil(usuario_actual);
-        // modificarUsuarioPorId(usuario_actual); // Function not implemented, call removed to avoid error
-        usuario_actual.modificarUsuarioPorId( usuario_actual);
+    // modificarUsuarioPorId(usuario_actual); // Function not implemented, call removed to avoid error
+    usuario_actual.modificarUsuarioPorId(usuario_actual);
     } else if (opcion == 2)
     {
         cout << "Eliminar perfil" << endl;

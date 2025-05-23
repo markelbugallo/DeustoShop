@@ -131,7 +131,7 @@ void Usuario::guardarUsuariosCSV(const string& filename, const vector<Usuario>& 
              << u.getCodigo_postal() << "\n";
     }
 }
-void Usuario::modificarUsuarioPorId(Usuario usuarioActual) {
+void Usuario::modificarUsuarioPorId(Usuario& usuarioActual) {
     string input;
     cout << "Modificar usuario (deja en blanco para mantener el valor actual):\n";
 
