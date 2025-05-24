@@ -162,3 +162,19 @@ void Usuario::modificarUsuarioPorId(Usuario& usuarioActual) {
 
     cout << "Usuario modificado correctamente.\n";
 }
+
+void Usuario::agregarPedido(const Pedido& pedido) {
+    pedidos_realizados.push_back(pedido);
+}
+
+const vector<Pedido>& Usuario::getPedidosRealizados() const {
+    return pedidos_realizados;
+}
+
+void Usuario::imprimirPedidosRealizados() const {
+    cout << "Pedidos realizados por el usuario " << nombre_usuario << ":\n";
+    for (const auto& pedido : pedidos_realizados) {
+        Pedido::imprimirInfPedido();
+        cout << "-----------------------------\n";
+    }
+}
