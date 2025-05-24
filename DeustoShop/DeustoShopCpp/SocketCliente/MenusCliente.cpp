@@ -158,7 +158,8 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
         cout << "2) Historial de compras\n";
         cout << "3) Mostrar almacenes\n";
         cout << "4) Mi perfil\n";
-        cout << "5) Salir\n\n";
+        cout << "5) Realizar pedido\n";
+        cout << "6) Salir\n\n";
         cout << "Elija una opcion: ";
         cin >> opcion;
 
@@ -177,7 +178,10 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
         {
             mostrarMenuMiPerfil(usuario_actual);
             break;
-        } else if (opcion == 5)
+        } else if (opcion == 5){
+
+        map<int, int> productosPedido = Pedido::realizarPedidoInteractivo();
+        } else if (opcion == 6)
         {
             cout << "\nCerrando sesion...\n\n";
             mostrarMenuInicial();

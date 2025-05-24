@@ -52,3 +52,27 @@ void Pedido::imprimirInfPedido() {
     }
     cout << "-------------------------------------------------------------" << endl << endl;
 }
+
+map<int, int> Pedido::realizarPedidoInteractivo() {
+    map<int, int> productosCantidades;
+    int id_producto, cantidad;
+
+    cout << "REALIZAR PEDIDO" << endl;
+    cout << "Introduce el ID del producto (0 para terminar): ";
+    cin >> id_producto;
+
+    while (id_producto != 0) {
+        cout << "Cantidad para el producto " << id_producto << ": ";
+        cin >> cantidad;
+        if (cantidad > 0) {
+            productosCantidades[id_producto] += cantidad;
+            cout << "Producto añadido al pedido." << endl;
+        } else {
+            cout << "Cantidad no válida. Intenta de nuevo." << endl;
+        }
+        cout << "Introduce el ID del siguiente producto (0 para terminar): ";
+        cin >> id_producto;
+    }
+
+    return productosCantidades;
+}

@@ -55,6 +55,7 @@ public:
     string getDireccion() const;
     int getCodigo_Postal() const;
     void imprimirInfPedido();
+     static map<int, int> realizarPedidoInteractivo();
 };
 
 #endif // PEDIDO_H
