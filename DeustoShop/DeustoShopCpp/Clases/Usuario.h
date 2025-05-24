@@ -1,7 +1,10 @@
 #ifndef USUARIO_H
 #define USUARIO_H
+
 #include <string>
 #include <vector>
+#include "Pedido.h" // Añadido para el almacén de pedidos
+
 using namespace std;
 
 class Usuario {
@@ -13,6 +16,8 @@ private:
     int id_subscripcion;
     string direccion;
     int codigo_postal;
+
+    vector<Pedido> pedidos_realizados; // Almacén de pedidos
 
 public:
     Usuario();
@@ -46,15 +51,16 @@ public:
 
     // funciones
     void imprimirUsuario(Usuario usuarioactual);
-    // Carga un usuario desde un CSV
-      vector<Usuario> cargarUsuariosCSV(const string& filename);
-    // Modifica un usuario por ID
-    void modificarUsuarioPorId(Usuario& usuarioActual); 
-    // Guarda todos los usuarios en un CSV
-     void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios);
 
+    // Métodos para pedidos del usuario
+    void agregarPedido(const Pedido& pedido);
+    const vector<Pedido>& getPedidosRealizados() const;
+    void imprimirPedidosRealizados() const;
+
+    // Métodos estáticos para CSV
+    static vector<Usuario> cargarUsuariosCSV(const string& filename);
+    static void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios);
+    static void modificarUsuarioPorId(Usuario& usuarioActual); 
 };
 
 #endif // USUARIO_H
-
-//dwdwdw
