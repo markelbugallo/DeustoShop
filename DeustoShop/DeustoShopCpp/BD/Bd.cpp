@@ -10,7 +10,7 @@ using namespace std;
 
 vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
     vector<Almacen> almacenes;
-    string line;
+    string linea;
 
     ifstream file(fichero);
     if (!file.is_open()) {
@@ -18,8 +18,8 @@ vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
         return almacenes;
     }
 
-    while (getline(file, line)) {
-        stringstream ss(line);
+    while (getline(file, linea)) {
+        stringstream ss(linea);
         string id, nombre, contacto, direccion, postal;
 
         getline(ss, id, ';');
@@ -37,11 +37,11 @@ vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
             almacenes.push_back(a);
         }
         catch (const invalid_argument &e) {
-            cout << "Error de formato en línea: \"" << line << "\" -> "
+            cout << "Error de formato en línea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
         catch (const out_of_range &e) {
-            cout << "Valor fuera de rango en línea: \"" << line << "\" -> "
+            cout << "Valor fuera de rango en línea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
     }
@@ -52,7 +52,7 @@ vector<Almacen> cargarAlmacenesCSV(const string &fichero) {
 
 vector<Pedido> cargarPedidosCSV(const string &fichero) {
     vector<Pedido> pedidos;
-    string line;
+    string linea;
 
     ifstream file(fichero);
     if (!file.is_open()) {
@@ -60,8 +60,8 @@ vector<Pedido> cargarPedidosCSV(const string &fichero) {
         return pedidos;
     }
 
-    while (getline(file, line)) {
-        stringstream ss(line);
+    while (getline(file, linea)) {
+        stringstream ss(linea);
         string id_pedidoStr, fecha_pedidoStr, estado_pedido, id_usuarioStr, productosCantidadesStr, direccion, codigo_postalStr;
 
         getline(ss, id_pedidoStr, ';');
@@ -95,11 +95,11 @@ vector<Pedido> cargarPedidosCSV(const string &fichero) {
             pedidos.push_back(pe);
         
         } catch (const invalid_argument &e) {
-            cout << "Error de formato en linea: \"" << line << "\" -> "
+            cout << "Error de formato en linea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
         catch (const out_of_range &e) {
-            cout << "Valor fuera de rango en linea: \"" << line << "\" -> "
+            cout << "Valor fuera de rango en linea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
     }
@@ -110,7 +110,7 @@ vector<Pedido> cargarPedidosCSV(const string &fichero) {
 
 vector<Producto> cargarProductosCSV(const string &fichero) {
     vector<Producto> productos;
-    string line;
+    string linea;
 
     ifstream file(fichero);
     if (!file.is_open()) {
@@ -118,8 +118,8 @@ vector<Producto> cargarProductosCSV(const string &fichero) {
         return productos;
     }
 
-    while (getline(file, line)) {
-        stringstream ss(line);
+    while (getline(file, linea)) {
+        stringstream ss(linea);
         string id_producto, nombre_producto, descripcion, precio, id_proveedor, categoria;
 
         getline(ss, id_producto, ';');
@@ -138,11 +138,11 @@ vector<Producto> cargarProductosCSV(const string &fichero) {
             Producto p(idProductoInt, nombre_producto, descripcion, doublePrecio, idProveedorInt, categoria);
             productos.push_back(p);
         } catch (const invalid_argument &e) {
-            cout << "Error de formato en linea: \"" << line << "\" -> "
+            cout << "Error de formato en linea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
         catch (const out_of_range &e) {
-            cout << "Valor fuera de rango en linea: \"" << line << "\" -> "
+            cout << "Valor fuera de rango en linea: \"" << linea << "\" -> "
                  << e.what() << endl;
         }
     }
@@ -150,3 +150,126 @@ vector<Producto> cargarProductosCSV(const string &fichero) {
     file.close();
     return productos;
 }
+
+vector<Proveedor> cargarProveedoresCSV(const string &fichero) {
+    vector<Proveedor> proveedores;
+    string linea;
+
+    ifstream file(fichero);
+    if(!file.is_open()) {
+        cout << "No se pudo abrir el archivo: " << fichero << endl;
+        return proveedores;
+    }
+
+    while (getline(file, linea)) {
+        stringstream ss(linea);
+        string id_proveedorStr, nombre_proveedor, contacto_proveedor;
+
+        getline(ss, id_proveedorStr, ';');
+        getline(ss, nombre_proveedor, ';');
+        getline(ss, contacto_proveedor, ';');
+
+        try
+        {
+            int id_proveedor = stoi(id_proveedorStr);
+
+            Proveedor prov(id_proveedor, nombre_proveedor, contacto_proveedor);
+            proveedores.push_back(prov);
+        } catch (const invalid_argument &e) {
+            cout << "Error de formato en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+        catch (const out_of_range &e) {
+            cout << "Valor fuera de rango en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+    }
+
+    file.close();
+    return proveedores;   
+}
+
+vector<Subscripcion> cargarSubscripcionesCSV(const string &fichero) {
+    vector<Subscripcion> subscripciones;
+    string linea;
+
+    ifstream file(fichero);
+    if (!file.is_open()) {
+        cout << "No se pudo abrir el archivo: " << fichero << endl;
+        return subscripciones;
+    }
+
+    while (getline(file, linea)) {
+        stringstream ss(linea);
+        string id_subcripcionStr, tipo, descuentoStr;
+
+        getline(ss, id_subcripcionStr, ';');
+        getline(ss, tipo, ';');
+        getline(ss, descuentoStr, ';');
+
+        try
+        {
+            int id_subcripcion = stoi(id_subcripcionStr);
+            int descuento = stoi(descuentoStr);
+
+            Subscripcion sub(id_subcripcion, tipo, descuento);
+            subscripciones.push_back(sub);
+        } catch (const invalid_argument &e) {
+            cout << "Error de formato en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+        catch (const out_of_range &e) {
+            cout << "Valor fuera de rango en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+    }
+    
+    file.close();
+    return subscripciones;
+}
+
+vector<Usuario> cargarUsuariosCSV(const string &fichero) {
+    vector<Usuario> usuarios;
+    string linea;
+
+    ifstream file(fichero);
+    if (!file.is_open()) {
+        cout << "No se pudo abrir el archivo: " << fichero << endl;
+        return usuarios;
+    }
+
+    while (getline(file, linea)) {
+        stringstream ss(linea);
+        string id_usuarioStr, nombre_usuario, contrasena_usuario, contacto_usuario, id_subscripcionStr, direccion, codigo_postalStr;
+
+        getline(ss, id_usuarioStr, ';');
+        getline(ss, nombre_usuario, ';');
+        getline(ss, contrasena_usuario, ';');
+        getline(ss, contacto_usuario, ';');
+        getline(ss, id_subscripcionStr, ';');
+        getline(ss, direccion, ';');
+        getline(ss, codigo_postalStr, ';');
+
+        try
+        {
+            int id_usuario = stoi(id_usuarioStr);
+            int id_subscripcion = stoi(id_subscripcionStr);
+            int codigo_postal = stoi(codigo_postalStr);
+
+            Usuario u(id_usuario, nombre_usuario, contrasena_usuario, contacto_usuario, id_subscripcion, direccion, codigo_postal);
+            usuarios.push_back(u);
+        } catch (const invalid_argument &e) {
+            cout << "Error de formato en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+        catch (const out_of_range &e) {
+            cout << "Valor fuera de rango en linea: \"" << linea << "\" -> "
+                 << e.what() << endl;
+        }
+    }
+
+    file.close();
+    return usuarios;
+}
+
+map<string, string> usuariosContrasenas;

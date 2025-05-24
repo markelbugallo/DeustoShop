@@ -6,6 +6,7 @@
 #include "../Clases/Usuario.h"
 #include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
+#include <set>
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -16,11 +17,26 @@ void MenusCliente::cargarDatos() {
     almacenes.clear();
     pedidos.clear();
     productos.clear();
+    proveedores.clear();
+    subscripciones.clear();
+    usuarios.clear();
 
     // volver a cargar
     almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
     pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
     productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
+    proveedores = cargarProveedoresCSV("../DeustoShopC/Data/proveedores.csv");
+    subscripciones  = cargarSubscripcionesCSV("../DeustoShopC/Data/Subscripciones.csv");
+    usuarios = cargarUsuariosCSV("../DeustoShopC/Data/usuarios.csv");
+
+    // usuarios y contraseñas
+    for (size_t i = 0; i < usuarios.size(); i++)
+    {
+        if (usuariosContrasenas.find((usuarios[i].getNombre_usuario())) == usuariosContrasenas.end())
+        {
+            usuariosContrasenas[usuarios[i].getNombre_usuario()] = usuarios[i].getContrasena_usuario();
+        }
+    }   
 }
 
 int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
@@ -87,12 +103,15 @@ void MenusCliente::mostrarMenuInicial() {
             false;
         } else if (opcion == 2)
         {
-            cout << "\n\nProbando server...\n\n";
+            /*cout << "\n\nProbando server...\n\n";
             string respuesta;
-            if (mandarAlServidor("VerPERFIL", respuesta) == 0)
+            if (mandarAlServidor("INICIAR SESION", respuesta) == 0)
             {
-                //mostrarMenuPrincipal();
-            }
+                
+            }*/
+
+            usuario_actual = mostrarMenuInicioSesion();
+            false;
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
@@ -140,17 +159,55 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
     // el id se asigna automaticamente te pone +1 al ultimo registrado
-    cout << "ID: ";
-    cin >> id_usuario;
-    nuevoUsuario.setId_usuario(id_usuario);
-
-
+    nuevoUsuario.setId_usuario(usuarios.size() + 1);
     return nuevoUsuario;
+}
+
+Usuario MenusCliente::mostrarMenuInicioSesion() {
+    // variables para almacenar respuestas del usuario
+    Usuario usuario_actual;
+    string nombre;
+    string contra;
+
+    while (true)
+    {
+        // pedir datos al usuario
+        cout << "\n\nNombre de usuario: ";
+        cin >> nombre;
+
+        if (usuariosContrasenas.find(nombre) == usuariosContrasenas.end())
+        {
+            cout << endl << "Ese nombre de usuario no esta registrado." << endl;
+        } else {
+            cout << endl << "Contrasenya: ";
+            cin >> contra;
+
+            if (usuariosContrasenas[nombre] != contra)
+            {
+                cout << endl << "Contrasenya incorrecta" << endl;
+            } else {
+                cout << endl << "Inicio de sesion correcto" << endl << endl;
+                break;
+            }
+        }
+    }
+    
+
+    // el usuario esta registrado, buscar cual son todos sus datos
+    for (Usuario u : usuarios) {
+        if (u.getNombre_usuario() == nombre && u.getContrasena_usuario() == contra)
+        {
+            usuario_actual = u;
+        }
+    }
+    
+    return usuario_actual;
 }
 
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     int opcion = 0;
 
+<<<<<<< HEAD
     while (true)
     {
         cout << "\nMENU PRINCIPAL\n";
@@ -187,12 +244,62 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
             mostrarMenuInicial();
             break;
         }
+=======
+    cout << "\nMENU PRINCIPAL\n";
+    cout << "1) Catalogo de productos\n";
+    cout << "2) Historial de compras\n";
+    cout << "3) Mostrar almacenes\n";
+    cout << "4) Mi perfil\n";
+    cout << "5) Salir\n\n";
+    cout << "Elija una opcion: ";
+    cin >> opcion;
+
+    if (opcion == 1)
+    {
+        mostrarMenuProductos(usuario_actual);
+    } else if (opcion == 2)
+    {
+        mostrarHistorialCompras(usuario_actual);
+    } else if (opcion == 3)
+    {
+        mostrarAlmacenes(usuario_actual);
+    } else if (opcion == 4)
+    {
+        mostrarMenuMiPerfil(usuario_actual);
+    } else if (opcion == 5)
+    {
+        cout << "\nCerrando sesion...\n\n";
+        mostrarMenuInicial();
+    }
+    
+}
+
+void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
+    int opcion;
+    cout << endl << "MENU DE PRODUCTOS" << endl;
+    cout << "1) Mostrar todos los productos\n";
+    cout << "2) Mostrar productos de una categoria especifica\n";
+    cout << "3) Volver al menu principal\n\n";
+    cout << "Elija una opcion: ";
+    cin >> opcion;
+
+
+    if (opcion == 1)
+    {
+        mostrarTodosLosProductos(usuario_actual);
+    } else if (opcion == 2)
+    {
+        mostrarProductosPorCategoria(usuario_actual);
+    } else if (opcion == 3)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+>>>>>>> 83cf9d09f20970e3e192a408302bb8e720eb3513
     }
 }
 
-void MenusCliente::mostrarProductos(Usuario usuario_actual) {
+void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
     int opcion;
-    cout << endl << "PRODUCTOS" << endl;
+    cout << endl << "TODOS LOS PRODUCTOS" << endl;
 
     for (size_t i = 0; i < productos.size(); i++) {
         cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
@@ -207,7 +314,50 @@ void MenusCliente::mostrarProductos(Usuario usuario_actual) {
     {
         mostrarMenuPrincipal(usuario_actual);
     }
-    
+}
+
+void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
+    int opcion;
+    string pregunta;
+    string eleccion;
+    set<string> categoriasDisponibles = {"JUGUETERIA", "HOGAR", "ROPA", "ELECTRONICA", "ALIMENTACION", "LIBRERIA", "DEPORTE", "OTROS"};
+
+    while (true)
+    {
+        cout << endl << endl << "Categorias disponibles: \nJUGUETERIA\nHOGAR\nROPA\nELECTRONICA\nALIMENTACION\nLIBRERIA\nDEPORTE\nOTROS\nSeleccione una opcion (mayusculas necesarias): ";
+        cin >> eleccion;
+        cout << endl;
+
+        if (categoriasDisponibles.find(eleccion) == categoriasDisponibles.end())
+        {
+            cout << "La opcion es incorrecta, pruebe de nuevo";
+        } else {
+            for (Producto p : productos) {
+            if (p.getCategoria() == eleccion)
+            {
+                cout << p.getId_producto() << " " << p.getNombre_producto() << " " << p.getPrecio() << endl;
+            }
+            }
+
+            cout << "\nDesea ver alguna categoria mas? (s/n): ";
+            cin >> pregunta;
+
+            if (pregunta == "n")
+            {
+                break;
+            }
+        }
+    }
+
+    cout << endl << "Pulsa 1 para volver al menu principal: ";
+    cin >> opcion;
+
+    cout << endl;
+
+    if (opcion == 1)
+    {
+        mostrarMenuPrincipal(usuario_actual);
+    }
 }
 
 void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
