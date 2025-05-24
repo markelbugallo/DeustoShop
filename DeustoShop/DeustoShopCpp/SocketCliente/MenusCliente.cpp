@@ -213,6 +213,7 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     cout << "3) Mostrar almacenes\n";
     cout << "4) Mi perfil\n";
     cout << "5) Salir\n\n";
+    cout << "6) Realizar pedido\n";
     cout << "Elija una opcion: ";
     cin >> opcion;
 
@@ -232,6 +233,9 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     {
         cout << "\nCerrando sesion...\n\n";
         mostrarMenuInicial();
+    }else if( opcion == 6)
+    {
+    map<int, int> productosPedido = Pedido::realizarPedidoInteractivo(); 
     }
     
 }
