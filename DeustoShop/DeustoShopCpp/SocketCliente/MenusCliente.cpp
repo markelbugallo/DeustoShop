@@ -207,44 +207,6 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     int opcion = 0;
 
-<<<<<<< HEAD
-    while (true)
-    {
-        cout << "\nMENU PRINCIPAL\n";
-        cout << "1) Catalogo de productos\n";
-        cout << "2) Historial de compras\n";
-        cout << "3) Mostrar almacenes\n";
-        cout << "4) Mi perfil\n";
-        cout << "5) Realizar pedido\n";
-        cout << "6) Salir\n\n";
-        cout << "Elija una opcion: ";
-        cin >> opcion;
-
-        if (opcion == 1)
-        {
-            mostrarProductos(usuario_actual);
-            break;
-        } else if (opcion == 2)
-        {
-            mostrarHistorialCompras(usuario_actual);
-            break;
-        } else if (opcion == 3)
-        {
-            mostrarAlmacenes(usuario_actual);
-        } else if (opcion == 4)
-        {
-            mostrarMenuMiPerfil(usuario_actual);
-            break;
-        } else if (opcion == 5){
-
-        map<int, int> productosPedido = Pedido::realizarPedidoInteractivo();
-        } else if (opcion == 6)
-        {
-            cout << "\nCerrando sesion...\n\n";
-            mostrarMenuInicial();
-            break;
-        }
-=======
     cout << "\nMENU PRINCIPAL\n";
     cout << "1) Catalogo de productos\n";
     cout << "2) Historial de compras\n";
@@ -293,7 +255,6 @@ void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     } else if (opcion == 3)
     {
         mostrarMenuPrincipal(usuario_actual);
->>>>>>> 83cf9d09f20970e3e192a408302bb8e720eb3513
     }
 }
 
