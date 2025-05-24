@@ -6,6 +6,7 @@
 #include "../Clases/Usuario.h"
 #include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
+#include "../Clases/Utils.h"
 #include <set>
 using namespace std;
 #define SERVER_IP "127.0.0.1"
@@ -94,8 +95,8 @@ void MenusCliente::mostrarMenuInicial() {
         cout << "1) Registrarse\n";
         cout << "2) Iniciar sesion\n";
         cout << "3) Salir\n\n";
-        cout << "Elija una opcion: ";
-        cin >> opcion;
+        opcion = pedirEntero("Elija una opcion: ");
+        if (opcion == -1) continue;
 
         if (opcion == 1)
         {
@@ -125,8 +126,8 @@ void MenusCliente::mostrarMenuInicial() {
 
 Usuario MenusCliente::mostrarMenuRegistro() {
     // variables para almacenar la entrada del usuario
-    string nombre_usu, contrasena, direccion, email;
-    int tipo_subscripcion, codigo_postal, id_usuario;
+    string nombre_usu, contrasena, direccion, email, tipo_subscripcion;
+    int codigo_postal, id_usuario;
 
     // variable para añadir el usuario nuevo con las variables introducidas por el usuario
     Usuario nuevoUsuario;
@@ -150,12 +151,15 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     getline(cin, email);
     nuevoUsuario.setContacto_usuario(email);
 
-    cout << "Tipo de subscripcion: ";
+    cout << "Tipo de Suscripción: ";
     cin >> tipo_subscripcion;
     nuevoUsuario.setId_subscripcion(tipo_subscripcion);
 
-    cout << "Codigo Postal: ";
-    cin >> codigo_postal;
+    codigo_postal = pedirEntero("Codigo Postal: ");
+    if (codigo_postal == -1) {
+        cout << "Volviendo al menú anterior..." << endl;
+        return Usuario(); // Devuelve un usuario vacío
+    }
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
     // el id se asigna automaticamente te pone +1 al ultimo registrado
@@ -214,8 +218,8 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     cout << "4) Mi perfil\n";
     cout << "5) Salir\n\n";
     cout << "6) Realizar pedido\n";
-    cout << "Elija una opcion: ";
-    cin >> opcion;
+    opcion = pedirEntero("Elija una opcion: ");
+    if (opcion == -1) return;
 
     if (opcion == 1)
     {
@@ -246,8 +250,9 @@ void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     cout << "1) Mostrar todos los productos\n";
     cout << "2) Mostrar productos de una categoria especifica\n";
     cout << "3) Volver al menu principal\n\n";
-    cout << "Elija una opcion: ";
-    cin >> opcion;
+    opcion = pedirEntero("Elija una opcion: ");
+    if (opcion == -1) return;
+
 
 
     if (opcion == 1)
@@ -270,9 +275,7 @@ void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
         cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
     }
 
-    cout << endl << "Pulsa 1 para volver al menu principal: ";
-    cin >> opcion;
-
+    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
     cout << endl;
 
     if (opcion == 1)
@@ -314,9 +317,7 @@ void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
         }
     }
 
-    cout << endl << "Pulsa 1 para volver al menu principal: ";
-    cin >> opcion;
-
+    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
     cout << endl;
 
     if (opcion == 1)
@@ -338,10 +339,9 @@ void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
             }
     }
 
-    cout << endl << "Pulsa 1 para volver al menu principal: ";
-    cin >> opcion;
-
+    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
     cout << endl;
+
     if (opcion == 1)
     {
         mostrarMenuPrincipal(usuario_actual);
@@ -357,10 +357,9 @@ void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
         almacenes[i].imprimirAlmacen();
     }
 
-    cout << endl << "Pulsa 1 para volver al menu principal: ";
-    cin >> opcion;
-
+    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
     cout << endl;
+
     if (opcion == 1)
     {
         mostrarMenuPrincipal(usuario_actual);
@@ -381,8 +380,8 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
     cout <<  endl << "1) Modificar datos" << endl;
     cout << "2) Eliminar perfil" << endl;
     cout << "3) Volver al menu principal" << endl;
-    cout << endl << "Elija una opcion: ";
-    cin >> opcion;
+    opcion = pedirEntero("\nElija una opcion: ");
+    if (opcion == -1) return;
 
     if (opcion == 1)
     {

@@ -174,7 +174,7 @@ const vector<Pedido>& Usuario::getPedidosRealizados() const {
 void Usuario::imprimirPedidosRealizados() const {
     cout << "Pedidos realizados por el usuario " << nombre_usuario << ":\n";
     for (const auto& pedido : pedidos_realizados) {
-        Pedido::imprimirInfPedido();
+        pedido.imprimirInfPedido();
         cout << "-----------------------------\n";
     }
 }

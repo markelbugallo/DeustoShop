@@ -43,7 +43,7 @@ string Pedido::getDireccion() const {
 int Pedido::getCodigo_Postal() const {
     return codigo_Postal;
 }
-void Pedido::imprimirInfPedido() {
+void Pedido::imprimirInfPedido() const{
     cout << "-------------------------------------------------------------" << endl;
     cout << "Numero de pedido: " << id_pedido << "          "  << "Estado del envio: " << estado_pedido << endl << endl;
     cout << "Id del producto " << "                                  " << "Cantidades" << endl; 

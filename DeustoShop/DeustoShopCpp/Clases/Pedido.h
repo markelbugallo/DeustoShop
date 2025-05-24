@@ -54,7 +54,7 @@ public:
     map<int, int> getProductosCantidades() const;
     string getDireccion() const;
     int getCodigo_Postal() const;
-    void imprimirInfPedido();
+    void imprimirInfPedido() const;
      static map<int, int> realizarPedidoInteractivo();
 };
 
