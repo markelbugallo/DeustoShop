@@ -127,7 +127,7 @@ void MenusCliente::mostrarMenuInicial() {
 Usuario MenusCliente::mostrarMenuRegistro() {
     // variables para almacenar la entrada del usuario
     string nombre_usu, contrasena, direccion, email, tipo_subscripcion;
-    int codigo_postal, id_usuario;
+    int codigo_postal, id_usuario, id_subcripcion;
 
     // variable para añadir el usuario nuevo con las variables introducidas por el usuario
     Usuario nuevoUsuario;
@@ -151,9 +151,27 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     getline(cin, email);
     nuevoUsuario.setContacto_usuario(email);
 
-    cout << "Tipo de Suscripción: ";
+    cout << "Tipo de Suscripcion ";
+    cout << "[";
+    for (Subscripcion s : subscripciones) {
+        if (s.getTipo() != "Autonomos")
+        {
+            cout << " " << s.getTipo() << ", ";
+        } else {
+            cout << " " << s.getTipo();
+        }  
+    }
+    cout << " ]: ";
     cin >> tipo_subscripcion;
-    nuevoUsuario.setId_subscripcion(tipo_subscripcion);
+
+    for (Subscripcion s : subscripciones) {
+        if (tipo_subscripcion == s.getTipo())
+        {
+         id_subcripcion = s.getId_subscripcion();   
+        }
+    }
+
+    nuevoUsuario.setId_subscripcion(id_subcripcion);
 
     codigo_postal = pedirEntero("Codigo Postal: ");
     if (codigo_postal == -1) {
