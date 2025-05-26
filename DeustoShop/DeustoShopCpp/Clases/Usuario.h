@@ -59,7 +59,6 @@ public:
 
     // Métodos estáticos para CSV
     static vector<Usuario> cargarUsuariosCSV(const string& filename);
-    static void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios);
     static void modificarUsuarioPorId(Usuario& usuarioActual); 
 };
 

@@ -66,7 +66,7 @@ map<int, int> Pedido::realizarPedidoInteractivo() {
         cin >> cantidad;
         if (cantidad > 0) {
             productosCantidades[id_producto] += cantidad;
-            cout << "Producto añadido al pedido." << endl;
+            cout << "Producto anyadido al pedido." << endl;
         } else {
             cout << "Cantidad no válida. Intenta de nuevo." << endl;
         }

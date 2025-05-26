@@ -124,6 +124,7 @@ void MenusCliente::mostrarMenuInicial() {
 }
 
 Usuario MenusCliente::mostrarMenuRegistro() {
+     cargarDatos();
 
     string nombre_usu, contrasena, direccion, email, tipo_subscripcion;
     int codigo_postal, id_usuario, id_subcripcion;
@@ -180,6 +181,11 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
     nuevoUsuario.setId_usuario(usuarios.size() + 1);
+
+    usuarios.push_back(nuevoUsuario); 
+
+    guardarUsuariosCSV(usuarios);
+
     return nuevoUsuario;
 }
 
@@ -263,7 +269,7 @@ void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
     //mostrarListaProductos();
 
     char respuesta;
-    cout << "\n¿Quieres añadir algún producto a tu cesta? (s/n): ";
+    cout << "\n¿Quieres anyadir algún producto a tu cesta? (s/n): ";
     cin >> respuesta;
 
     while (respuesta == 's' || respuesta == 'S') {
@@ -275,7 +281,7 @@ void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
 
         cesta[id_producto] += cantidad;
 
-        cout << "¿Quieres añadir otro producto? (s/n): ";
+        cout << "¿Quieres anyadir otro producto? (s/n): ";
         cin >> respuesta;
     }
 }
@@ -364,7 +370,7 @@ void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
     cout << endl << "TODOS LOS PRODUCTOS" << endl;
 
     for (size_t i = 0; i < productos.size(); i++) {
-        cout << productos[i].getId_producto() << productos[i].getNombre_producto() << productos[i].getPrecio() << endl;
+        cout << productos[i].getId_producto() << "  |  " << productos[i].getNombre_producto() << "  |  " << productos[i].getPrecio() << " Euros" <<endl;
     }
 
     opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
@@ -395,7 +401,7 @@ void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
             for (Producto p : productos) {
             if (p.getCategoria() == eleccion)
             {
-                cout << p.getId_producto() << " " << p.getNombre_producto() << " " << p.getPrecio() << endl;
+                cout << p.getId_producto() << "  |  " << p.getNombre_producto() << "  |  " << p.getPrecio() << " Euros" <<endl;
             }
             }
 

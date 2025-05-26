@@ -118,19 +118,6 @@ vector<Usuario> Usuario::cargarUsuariosCSV(const string& filename) {
     }
     return usuarios;
 }
-void Usuario::guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios) {
-    ofstream file("../DeustoShopC/Data/usuarios.csv");
-    file << "id_usuario,nombre_usuario,contrasena_usuario,contacto_usuario,id_subscripcion,direccion,codigo_postal\n";
-    for (const auto& u : usuarios) {
-        file << u.getId_usuario() << ","
-             << u.getNombre_usuario() << ","
-             << u.getContrasena_usuario() << ","
-             << u.getContacto_usuario() << ","
-             << u.getId_subscripcion() << ","
-             << u.getDireccion() << ","
-             << u.getCodigo_postal() << "\n";
-    }
-}
 void Usuario::modificarUsuarioPorId(Usuario& usuarioActual) {
     string input;
     cout << "Modificar usuario (deja en blanco para mantener el valor actual):\n";

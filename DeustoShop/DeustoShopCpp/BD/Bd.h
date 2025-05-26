@@ -17,6 +17,7 @@ vector<Producto> cargarProductosCSV(const string &fichero);
 vector<Proveedor> cargarProveedoresCSV(const string &fichero);
 vector<Subscripcion> cargarSubscripcionesCSV(const string &fichero);
 vector<Usuario> cargarUsuariosCSV(const string &fichero);
+void guardarUsuariosCsv(const vector<Usuario>& usuario);
 
 // mapa para almacenar usuarios y sus contraseñas para el login
 extern map<string, string> usuariosContrasenas;
