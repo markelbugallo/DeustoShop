@@ -86,7 +86,6 @@ void MenusCliente::mostrarMenuInicial() {
     int opcion = 0;
     Usuario usuario_actual;
 
-    // llamada a funcion para que cargue los datos
     cargarDatos();
 
     while (true)
@@ -125,11 +124,11 @@ void MenusCliente::mostrarMenuInicial() {
 }
 
 Usuario MenusCliente::mostrarMenuRegistro() {
-    // variables para almacenar la entrada del usuario
+
     string nombre_usu, contrasena, direccion, email, tipo_subscripcion;
     int codigo_postal, id_usuario, id_subcripcion;
 
-    // variable para añadir el usuario nuevo con las variables introducidas por el usuario
+
     Usuario nuevoUsuario;
 
     cout << "\nMENU DE REGISTRO\n" << "Introduzca los siguientes apartados...\n";
@@ -143,7 +142,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setContrasena_usuario(contrasena);
 
     cout << "Direccion: ";
-    cin.ignore(); // Limpiar buffer antes de getline
+    cin.ignore(); 
     getline(cin, direccion);
     nuevoUsuario.setDireccion(direccion);
 
@@ -176,24 +175,22 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     codigo_postal = pedirEntero("Codigo Postal: ");
     if (codigo_postal == -1) {
         cout << "Volviendo al menú anterior..." << endl;
-        return Usuario(); // Devuelve un usuario vacío
+        return Usuario(); 
     }
     nuevoUsuario.setCodigo_postal(codigo_postal);
 
-    // el id se asigna automaticamente te pone +1 al ultimo registrado
     nuevoUsuario.setId_usuario(usuarios.size() + 1);
     return nuevoUsuario;
 }
 
 Usuario MenusCliente::mostrarMenuInicioSesion() {
-    // variables para almacenar respuestas del usuario
+
     Usuario usuario_actual;
     string nombre;
     string contra;
 
     while (true)
     {
-        // pedir datos al usuario
         cout << "\n\nNombre de usuario: ";
         cin >> nombre;
 
@@ -214,8 +211,6 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
         }
     }
     
-
-    // el usuario esta registrado, buscar cual son todos sus datos
     for (Usuario u : usuarios) {
         if (u.getNombre_usuario() == nombre && u.getContrasena_usuario() == contra)
         {
@@ -234,8 +229,9 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     cout << "2) Historial de compras\n";
     cout << "3) Mostrar almacenes\n";
     cout << "4) Mi perfil\n";
-    cout << "5) Salir\n\n";
+    cout << "5) Salir\n";
     cout << "6) Realizar pedido\n";
+    cout << "7) Ver cesta\n";
     opcion = pedirEntero("Elija una opcion: ");
     if (opcion == -1) return;
 
@@ -258,9 +254,90 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     }else if( opcion == 6)
     {
     map<int, int> productosPedido = Pedido::realizarPedidoInteractivo(); 
-    }
-    
+      } else if (opcion == 7) {
+        mostrarMenuCesta(usuario_actual);
+    } 
 }
+
+void MenusCliente::mostrarMenuProductos(Usuario& usuario_actual) {
+    mostrarListaProductos()
+
+    char respuesta;
+    cout << "\n¿Quieres añadir algún producto a tu cesta? (s/n): ";
+    cin >> respuesta;
+
+    while (respuesta == 's' || respuesta == 'S') {
+        int id_producto, cantidad;
+        cout << "Introduce el ID del producto: ";
+        cin >> id_producto;
+        cout << "Introduce la cantidad: ";
+        cin >> cantidad;
+
+        cesta[id_producto] += cantidad;
+
+        cout << "¿Quieres añadir otro producto? (s/n): ";
+        cin >> respuesta;
+    }
+}
+double MenusCliente::obtenerPrecioProducto(int id_producto) {
+    for (const auto& prod : listaProductos) { 
+        if (prod.getId() == id_producto) {
+            return prod.getPrecio();
+        }
+    }
+    return 0.0;
+}
+
+void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
+    int opcion;
+    do {
+        cout << "\n--- CESTA DE LA COMPRA ---\n";
+        if (cesta.empty()) {
+            cout << "La cesta está vacía.\n";
+        } else {
+            cout << "ID\tCantidad\tPrecio\n";
+            for (const auto& par : cesta) {
+                int id = par.first;
+                int cantidad = par.second;
+                double precio = obtenerPrecioProducto(id); // Implementa esta función según tu lógica
+                cout << id << "\t" << cantidad << "\t\t" << precio * cantidad << "€\n";
+            }
+        }
+        cout << "\n1) Borrar un producto\n";
+        cout << "2) Vaciar cesta\n";
+        cout << "3) Confirmar pedido\n";
+        cout << "4) Volver al menú principal\n";
+        cout << "Elige una opción: ";
+        cin >> opcion;
+
+        if (opcion == 1 && !cesta.empty()) {
+            int id_borrar;
+            cout << "Introduce el ID del producto a borrar: ";
+            cin >> id_borrar;
+            cesta.erase(id_borrar);
+        } else if (opcion == 2) {
+            cesta.clear();
+        } else if (opcion == 3 && !cesta.empty()) {
+          
+            Pedido nuevoPedido(
+                0, 
+                Fecha(), 
+                "Pendiente", 
+                usuario_actual.getId_usuario(),
+                cesta,
+                usuario_actual.getDireccion(),
+                usuario_actual.getCodigo_postal()
+            );
+            usuario_actual.agregarPedido(nuevoPedido);
+            cesta.clear();
+            cout << "¡Pedido realizado!\n";
+        }
+    } while (opcion != 4);
+}
+
+
+
+
 
 void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     int opcion;
@@ -300,6 +377,10 @@ void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
     {
         mostrarMenuPrincipal(usuario_actual);
     }
+}
+double MenusCliente::obtenerPrecioProducto(int id_producto) {
+    // Implementa aquí la lógica real de búsqueda de precio
+    return 0.0;
 }
 
 void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
@@ -390,11 +471,10 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
 
     cout << "\n\nMI PERFIL\n" << "---------" << endl;
 
-    // Visualizar datos del usuario actual
+    
     usuario_actual.imprimirUsuario(usuario_actual);
 
 
-    // Funcionalidades
     cout <<  endl << "1) Modificar datos" << endl;
     cout << "2) Eliminar perfil" << endl;
     cout << "3) Volver al menu principal" << endl;
@@ -405,7 +485,7 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
     {
         cout << "Modificar datos" << endl;
         mostrarMenuMiPerfil(usuario_actual);
-    // modificarUsuarioPorId(usuario_actual); // Function not implemented, call removed to avoid error
+
     usuario_actual.modificarUsuarioPorId(usuario_actual);
     } else if (opcion == 2)
     {

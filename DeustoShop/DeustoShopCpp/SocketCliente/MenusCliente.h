@@ -9,6 +9,7 @@
 #include "../Clases/Usuario.h"
 #include <vector>
 #include <string>
+#include <map>
 using namespace std;
 
 class MenusCliente
@@ -20,19 +21,24 @@ private:
     vector<Proveedor> proveedores;
     vector<Subscripcion> subscripciones;
     vector<Usuario> usuarios;
+    map<int,int> cesta;
+    vector<Producto> listaProductos;
+    double obtenerPrecioProducto(int id_producto);
 public:
     void cargarDatos();
     void mostrarMenuInicial();
     Usuario mostrarMenuRegistro();
     Usuario mostrarMenuInicioSesion();
     void mostrarMenuPrincipal(Usuario usuario);
-    void mostrarMenuProductos(Usuario usuario);
+    void mostrarMenuProductos(Usuario usuario);    
     void mostrarTodosLosProductos(Usuario usuario);
     void mostrarProductosPorCategoria(Usuario usuario);
     void mostrarHistorialCompras(Usuario usuario);
     void mostrarAlmacenes(Usuario usuario);
     void mostrarMenuMiPerfil(Usuario usuario);
     int mandarAlServidor(const string &mensaje, string &respuesta);
+    void  mostrarMenuCesta(Usuario& usuario_actual);
+    void mostrarMenuProductos(Usuario usuario_actual);
 };
 
 #endif // MENUSCLIENTE_H
