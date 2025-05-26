@@ -184,7 +184,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
 
     usuarios.push_back(nuevoUsuario); 
 
-    guardarUsuariosCSV(usuarios);
+    guardarUsuariosCsv(usuarios);
 
     return nuevoUsuario;
 }
