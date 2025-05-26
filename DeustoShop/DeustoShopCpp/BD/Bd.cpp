@@ -2,6 +2,7 @@
 #include "../Clases/Almacen.h"
 #include "../Clases/Producto.h"
 #include "../Clases/Pedido.h"
+#include "../Clases/Usuario.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -271,7 +272,7 @@ vector<Usuario> cargarUsuariosCSV(const string &fichero) {
     file.close();
     return usuarios;
 }
-void guardarUsuariosCSV(const string& filename, const vector<Usuario>& usuarios) {
+void guardarUsuariosCsv(const vector<Usuario>& usuario) {
     ofstream file("../DeustoShopC/Data/usuarios.csv");
     file << "id_usuario,nombre_usuario,contrasena_usuario,contacto_usuario,id_subscripcion,direccion,codigo_postal\n";
     for (const auto& u : usuarios) {
