@@ -37,8 +37,8 @@ public:
     void mostrarAlmacenes(Usuario usuario);
     void mostrarMenuMiPerfil(Usuario usuario);
     int mandarAlServidor(const string &mensaje, string &respuesta);
-    void  mostrarMenuCesta(Usuario& usuario_actual);
-    void mostrarMenuProductos(Usuario usuario_actual);
+    void mostrarMenuCesta(Usuario& usuario_actual);
+    void mostrarMenuC(Usuario usuario);
 };
 
 #endif // MENUSCLIENTE_H

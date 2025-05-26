@@ -259,8 +259,8 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     } 
 }
 
-void MenusCliente::mostrarMenuProductos(Usuario& usuario_actual) {
-    mostrarListaProductos()
+void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
+    //mostrarListaProductos();
 
     char respuesta;
     cout << "\n¿Quieres añadir algún producto a tu cesta? (s/n): ";
@@ -280,8 +280,8 @@ void MenusCliente::mostrarMenuProductos(Usuario& usuario_actual) {
     }
 }
 double MenusCliente::obtenerPrecioProducto(int id_producto) {
-    for (const auto& prod : listaProductos) { 
-        if (prod.getId() == id_producto) {
+    for (Producto prod : productos) { 
+        if (prod.getId_producto() == id_producto) {
             return prod.getPrecio();
         }
     }
@@ -299,7 +299,7 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
             for (const auto& par : cesta) {
                 int id = par.first;
                 int cantidad = par.second;
-                double precio = obtenerPrecioProducto(id); // Implementa esta función según tu lógica
+                double precio = obtenerPrecioProducto(id);
                 cout << id << "\t" << cantidad << "\t\t" << precio * cantidad << "€\n";
             }
         }
@@ -334,9 +334,6 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
         }
     } while (opcion != 4);
 }
-
-
-
 
 
 void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
@@ -377,10 +374,6 @@ void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
     {
         mostrarMenuPrincipal(usuario_actual);
     }
-}
-double MenusCliente::obtenerPrecioProducto(int id_producto) {
-    // Implementa aquí la lógica real de búsqueda de precio
-    return 0.0;
 }
 
 void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
