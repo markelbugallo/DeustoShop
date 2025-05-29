@@ -117,8 +117,48 @@ int main() {
                 }
                 cerrarConexionTrasRespuesta = true;
             } else if (comando == "REGISTRAR_USUARIO") {
-                // Aquí deberías implementar la lógica de registro si no está ya
-                // respuestaServidor = ...
+                // Formato esperado: REGISTRAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
+                string id, nombre, contrasena, contacto, id_subscripcion, direccion, codigo_postal;
+                getline(ss, id, ';');
+                getline(ss, nombre, ';');
+                getline(ss, contrasena, ';');
+                getline(ss, contacto, ';');
+                getline(ss, id_subscripcion, ';');
+                getline(ss, direccion, ';');
+                getline(ss, codigo_postal, ';');
+
+                // Comprobar si el usuario ya existe
+                FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
+                bool existe = false;
+                if (f) {
+                    char linea[512];
+                    fgets(linea, sizeof(linea), f); // Saltar cabecera
+                    while (fgets(linea, sizeof(linea), f)) {
+                        stringstream lss(linea);
+                        string fid, fnombre;
+                        getline(lss, fid, ';');
+                        getline(lss, fnombre, ';');
+                        if (fnombre == nombre) {
+                            existe = true;
+                            break;
+                        }
+                    }
+                    fclose(f);
+                }
+                if (existe) {
+                    respuestaServidor = "ERROR;El usuario ya existe";
+                } else {
+                    // Añadir usuario al CSV
+                    FILE* fw = fopen("../../DeustoShopC/data/usuarios.csv", "a");
+                    if (!fw) {
+                        respuestaServidor = "ERROR;No se pudo escribir el archivo de usuarios";
+                    } else {
+                        fprintf(fw, "%s;%s;%s;%s;%s;%s;%s\n", id.c_str(), nombre.c_str(), contrasena.c_str(), contacto.c_str(), id_subscripcion.c_str(), direccion.c_str(), codigo_postal.c_str());
+                        fclose(fw);
+                        // Devolver los datos del usuario registrado
+                        respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
+                    }
+                }
                 cerrarConexionTrasRespuesta = true;
             } else if (comando == "EDITAR_USUARIO") {
                 // Formato esperado: EDITAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal

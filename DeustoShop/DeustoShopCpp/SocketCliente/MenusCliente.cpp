@@ -104,17 +104,16 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     Usuario nuevoUsuario;
     cout << "\nMENU DE REGISTRO\n" << "Introduzca los siguientes apartados...\n";
     cout << "Nombre de usuario: ";
-    cin >> nombre_usu;
+    getline(cin >> ws, nombre_usu); // Usar getline para evitar problemas de salto de línea
     nuevoUsuario.setNombre_usuario(nombre_usu);
     cout << "Contrasena: ";
-    cin >> contrasena;
+    getline(cin >> ws, contrasena); // Usar getline para evitar problemas de salto de línea
     nuevoUsuario.setContrasena_usuario(contrasena);
     cout << "Direccion: ";
-    cin.ignore(); 
-    getline(cin, direccion);
+    getline(cin >> ws, direccion);
     nuevoUsuario.setDireccion(direccion);
     cout << "Email: ";
-    getline(cin, email);
+    getline(cin >> ws, email);
     nuevoUsuario.setContacto_usuario(email);
     cout << "Tipo de Suscripcion ";
     cout << "[";
@@ -127,7 +126,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
         }  
     }
     cout << " ]: ";
-    cin >> tipo_subscripcion;
+    getline(cin >> ws, tipo_subscripcion);
     for (Subscripcion s : subscripciones) {
         if (tipo_subscripcion == s.getTipo())
         {
@@ -496,7 +495,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     cout << "\nQUE DESEA EDITAR\n";
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
-    //cout << "3) Contacto\n";
+    cout << "3) Contacto\n";
     //cout << "4) Direccion\n";
     cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
@@ -610,8 +609,10 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
             // Guarda el CSV actualizado
             guardarUsuariosCsv(usuarios);
             cout << "Perfil eliminado correctamente.\n";
-            // Volver al menú principal tras eliminar
-            mostrarMenuPrincipal(Usuario());
+            // Cierra la conexión de la sesión
+            this->conexionSesion.cerrar();
+            // Volver al menú inicial tras eliminar
+            mostrarMenuInicial();
             return;
         } else if (respuesta.rfind("ERROR;", 0) == 0) {
             cout << "Error del servidor: " << respuesta.substr(6) << endl;
