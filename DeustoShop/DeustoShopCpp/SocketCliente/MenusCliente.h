@@ -41,7 +41,7 @@ void cargarDatos();
     void mostrarAlmacenes(Usuario usuario_actual);
     void editarPerfil(Usuario& usuario_actual);
     void mostrarMenuMiPerfil(Usuario& usuario_actual);
-    bool eliminarPerfil(Usuario& usuario_actual);
+    void eliminarPerfil(Usuario& usuario_actual);
 };
 
 #endif // MENUSCLIENTE_H

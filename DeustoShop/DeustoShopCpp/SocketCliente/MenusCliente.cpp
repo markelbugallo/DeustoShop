@@ -528,6 +528,7 @@ void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
 void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     int opcion;
     string nuevoValor;
+    string nombre_anterior = usuario_actual.getNombre_usuario(); // Guarda el nombre antes de editar
     cout << "\nQUE DESEA EDITAR\n";
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
@@ -535,6 +536,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     cout << "4) Direccion\n";
     cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
+    cout << "7) Eliminar perfil\n";
     opcion = pedirEntero("Seleccione una opcion: ");
     if (opcion == -1 || opcion == 6) return;
 
@@ -604,6 +606,11 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
             }
         }
         guardarUsuariosCsv(usuarios);
+        // ACTUALIZA el mapa de usuariosContrasenas en memoria
+        if (nombre_anterior != usuario_actual.getNombre_usuario()) {
+            usuariosContrasenas.erase(nombre_anterior);
+        }
+        usuariosContrasenas[usuario_actual.getNombre_usuario()] = usuario_actual.getContrasena_usuario();
         cout << "Perfil actualizado correctamente (servidor y local).\n";
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
@@ -612,11 +619,45 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     }
 }
 
+void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
+
+    stringstream mensaje;
+    mensaje << "ELIMINAR_USUARIO;" << usuario_actual.getId_usuario();
+    string respuesta;
+    if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
+        if (respuesta == "OK" || respuesta == "OK;") {
+            // Elimina localmente del vector usuarios
+            usuarios.erase(
+                remove_if(usuarios.begin(), usuarios.end(),
+                    [&](const Usuario& u) { return u.getId_usuario() == usuario_actual.getId_usuario(); }),
+                usuarios.end()
+            );
+            // Elimina del mapa usuariosContrasenas
+            usuariosContrasenas.erase(usuario_actual.getNombre_usuario());
+            // Guarda el CSV actualizado
+            guardarUsuariosCsv(usuarios);
+            cout << "Perfil eliminado correctamente.\n";
+            // Volver al menú principal tras eliminar
+            mostrarMenuPrincipal(Usuario());
+            return;
+        } else if (respuesta.rfind("ERROR;", 0) == 0) {
+            cout << "Error del servidor: " << respuesta.substr(6) << endl;
+        } else {
+            cout << "Error al eliminar el perfil en el servidor. Respuesta: " << respuesta << endl;
+        }
+    } else {
+        cout << "Error de conexion con el servidor.\n";
+    }
+    // Si llega aquí, no se eliminó correctamente, vuelve al menú de perfil
+    mostrarMenuMiPerfil(usuario_actual);
+}
+
 // Modifica mostrarMenuMiPerfil para llamar a editarPerfil
 void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
     int opcion;
-    bool salir = false;
-    while (!salir) {
+    while (true) {
         cout << "\n\nMI PERFIL\n" << "---------" << endl;
         usuario_actual.imprimirUsuario(usuario_actual);
 
@@ -631,51 +672,12 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
             // Ya se actualiza usuario_actual, solo refrescamos la vista
             // No reiniciar sesion ni pedir datos antiguos
         } else if (opcion == 2) {
-            if (eliminarPerfil(usuario_actual)) {
-                // Si se elimina, salir al menu principal
-                mostrarMenuPrincipal(Usuario());
-                return;
-            }
-            // Si no, volvemos a mostrar el menu de perfil
+            eliminarPerfil(usuario_actual);
+            return;
         } else if (opcion == 3) {
             cout << "Volviendo al menu principal..." << endl;
             mostrarMenuPrincipal(usuario_actual);
             return;
         }
     }
-}
-
-bool MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
-    cout << "¿Seguro que quieres eliminar tu perfil? (s/n): ";
-    char confirm;
-    cin >> confirm;
-    if (confirm != 's' && confirm != 'S') return false;
-
-    stringstream mensaje;
-    mensaje << "ELIMINAR_USUARIO;" << usuario_actual.getId_usuario();
-    string respuesta;
-    if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
-        // Limpiar posibles espacios y saltos de línea
-        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
-        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
-        // Aceptar tanto "OK" como "OK;"
-        if (respuesta == "OK" || respuesta == "OK;") {
-            // Elimina localmente
-            usuarios.erase(
-                remove_if(usuarios.begin(), usuarios.end(),
-                    [&](const Usuario& u) { return u.getId_usuario() == usuario_actual.getId_usuario(); }),
-                usuarios.end()
-            );
-            guardarUsuariosCsv(usuarios);
-            cout << "Perfil eliminado correctamente.\n";
-            return true;
-        } else if (respuesta.rfind("ERROR;", 0) == 0) {
-            cout << "Error del servidor: " << respuesta.substr(6) << endl;
-        } else {
-            cout << "Error al eliminar el perfil en el servidor. Respuesta: " << respuesta << endl;
-        }
-    } else {
-        cout << "Error de conexion con el servidor.\n";
-    }
-    return false;
 }
