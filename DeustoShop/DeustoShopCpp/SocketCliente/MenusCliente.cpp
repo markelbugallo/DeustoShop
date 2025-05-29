@@ -13,6 +13,19 @@ using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
+// Clase auxiliar para gestionar la conexión persistente
+class ConexionServidor {
+public:
+    SOCKET s;
+    bool conectada;
+    ConexionServidor() : s(INVALID_SOCKET), conectada(false) {}
+    bool conectar();
+    bool enviar(const string& mensaje, string& respuesta);
+    void cerrar();
+};
+
+// Definición del miembro estático para la conexión persistente
+ConexionServidor MenusCliente::conexionSesion;
 
 void MenusCliente::cargarDatos() {
     // vaciar listas
@@ -42,45 +55,16 @@ void MenusCliente::cargarDatos() {
 }
 
 int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
-    WSADATA wsaData;
-	SOCKET s;
-	struct sockaddr_in server;
-	char sendBuff[512], recvBuff[512];
-
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-		cout << "Failed. Error Code : " << to_string(WSAGetLastError()) << endl;
-		return 1;
-	}
-
-    //SOCKET creation
-	if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-		cout << "Could not create socket : " << to_string(WSAGetLastError()) << endl;
-		WSACleanup();
-		return 1;
-	}
-
-    server.sin_addr.s_addr = inet_addr(SERVER_IP);
-	server.sin_family = AF_INET;
-	server.sin_port = htons(SERVER_PORT);
-
-    //CONNECT to remote server
-	if (connect(s, (struct sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
-		cout << "Connection error: " << to_string(WSAGetLastError()) << endl;
-		closesocket(s);
-		WSACleanup();
-		return 1;
-	}
-
-    send(s, mensaje.c_str(), mensaje.length(), 0);
-    int bytesReceived = recv(s, recvBuff, sizeof(recvBuff), 0);
-    recvBuff[bytesReceived] = '\0';
-    respuesta = recvBuff;
-
-    // CLOSING the socket and cleaning Winsock...
-	closesocket(s);
-	WSACleanup();
-
-    return 0;
+    if (this->conexionSesion.conectada) {
+        return this->conexionSesion.enviar(mensaje, respuesta) ? 0 : 1;
+    } else {
+        // Fallback: conexión temporal (por si acaso)
+        ConexionServidor temp;
+        if (!temp.conectar()) return 1;
+        bool ok = temp.enviar(mensaje, respuesta);
+        temp.cerrar();
+        return ok ? 0 : 1;
+    }
 }
 
 void MenusCliente::mostrarMenuInicial() {
@@ -126,32 +110,23 @@ void MenusCliente::mostrarMenuInicial() {
 
 Usuario MenusCliente::mostrarMenuRegistro() {
      cargarDatos();
-
     string nombre_usu, contrasena, direccion, email, tipo_subscripcion;
-    int codigo_postal, id_usuario, id_subcripcion;
-
-
+    int codigo_postal, id_usuario, id_subscripcion = 0;
     Usuario nuevoUsuario;
-
     cout << "\nMENU DE REGISTRO\n" << "Introduzca los siguientes apartados...\n";
-
     cout << "Nombre de usuario: ";
     cin >> nombre_usu;
     nuevoUsuario.setNombre_usuario(nombre_usu);
-
     cout << "Contrasena: ";
     cin >> contrasena;
     nuevoUsuario.setContrasena_usuario(contrasena);
-
     cout << "Direccion: ";
     cin.ignore(); 
     getline(cin, direccion);
     nuevoUsuario.setDireccion(direccion);
-
     cout << "Email: ";
     getline(cin, email);
     nuevoUsuario.setContacto_usuario(email);
-
     cout << "Tipo de Suscripcion ";
     cout << "[";
     for (Subscripcion s : subscripciones) {
@@ -164,26 +139,25 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     }
     cout << " ]: ";
     cin >> tipo_subscripcion;
-
     for (Subscripcion s : subscripciones) {
         if (tipo_subscripcion == s.getTipo())
         {
-         id_subcripcion = s.getId_subscripcion();   
+         id_subscripcion = s.getId_subscripcion();   
         }
     }
-
-    nuevoUsuario.setId_subscripcion(id_subcripcion);
-
+    nuevoUsuario.setId_subscripcion(id_subscripcion);
     codigo_postal = pedirEntero("Codigo Postal: ");
     if (codigo_postal == -1) {
         cout << "Volviendo al menu anterior..." << endl;
         return Usuario(); 
     }
     nuevoUsuario.setCodigo_postal(codigo_postal);
-
     nuevoUsuario.setId_usuario(usuarios.size() + 1);
-
-    // Enviar registro al servidor
+    ConexionServidor conexion;
+    if (!conexion.conectar()) {
+        cout << "No se pudo conectar al servidor." << endl;
+        return Usuario();
+    }
     stringstream mensaje;
     mensaje << "REGISTRAR_USUARIO;"
             << nuevoUsuario.getId_usuario() << ";"
@@ -193,10 +167,8 @@ Usuario MenusCliente::mostrarMenuRegistro() {
             << nuevoUsuario.getId_subscripcion() << ";"
             << nuevoUsuario.getDireccion() << ";"
             << nuevoUsuario.getCodigo_postal();
-
     string respuesta;
-    if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
-        // Actualiza objeto y CSV
+    if (conexion.enviar(mensaje.str(), respuesta) && respuesta.rfind("OK;", 0) == 0) {
         vector<string> partes;
         stringstream ss(respuesta);
         string item;
@@ -212,14 +184,16 @@ Usuario MenusCliente::mostrarMenuRegistro() {
         }
         usuarios.push_back(nuevoUsuario);
         guardarUsuariosCsv(usuarios);
-        // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
         cout << "Usuario registrado correctamente.\n";
+        conexion.cerrar();
         return nuevoUsuario;
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
+        conexion.cerrar();
         return Usuario();
     } else {
         cout << "Error al registrar usuario en el servidor.\n";
+        conexion.cerrar();
         return Usuario();
     }
 }
@@ -227,25 +201,25 @@ Usuario MenusCliente::mostrarMenuRegistro() {
 Usuario MenusCliente::mostrarMenuInicioSesion() {
     Usuario usuario_actual;
     string nombre, contra;
-
+    ConexionServidor conexion;
+    if (!conexion.conectar()) {
+        cout << "No se pudo conectar al servidor." << endl;
+        return usuario_actual;
+    }
     while (true) {
         cout << "\n\nNombre de usuario: ";
         cin >> nombre;
         cout << endl << "Contrasena: ";
         cin >> contra;
-
-        // Consultar al servidor
         stringstream mensaje;
         mensaje << "LOGIN;" << nombre << ";" << contra;
         string respuesta;
-        if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
-            // El servidor debe responder con OK;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
+        if (conexion.enviar(mensaje.str(), respuesta)) {
             if (respuesta.rfind("OK;", 0) == 0) {
                 vector<string> partes;
                 stringstream ss(respuesta);
                 string item;
                 while (getline(ss, item, ';')) partes.push_back(item);
-                // partes[0] = "OK", partes[1] = id, partes[2] = nombre, ...
                 if (partes.size() >= 8) {
                     usuario_actual.setId_usuario(stoi(partes[1]));
                     usuario_actual.setNombre_usuario(partes[2]);
@@ -254,7 +228,6 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                     usuario_actual.setId_subscripcion(stoi(partes[5]));
                     usuario_actual.setDireccion(partes[6]);
                     usuario_actual.setCodigo_postal(stoi(partes[7]));
-                    // Actualizar usuarios locales y CSV para reflejar los datos correctos
                     bool found = false;
                     for (auto& u : usuarios) {
                         if (u.getId_usuario() == usuario_actual.getId_usuario()) {
@@ -271,20 +244,19 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
                 break;
             } else if (respuesta == "EXITO") {
-                // Tratar EXITO como login correcto (caso especial)
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
                 break;
             } else if (respuesta.rfind("ERROR;", 0) == 0) {
-                // Mensaje de error del servidor, por ejemplo: ERROR;Usuario no encontrado
                 cout << "Error del servidor: " << respuesta.substr(6) << endl;
             } else {
-                // Si la respuesta no es ni OK ni ERROR, mostrarla para depuración
                 cout << "Respuesta inesperada del servidor: " << respuesta << endl;
             }
         } else {
             cout << "Error de conexion con el servidor." << endl;
         }
     }
+    // Guardar la conexión persistente para la sesión
+    this->conexionSesion = conexion;
     return usuario_actual;
 }
 
@@ -318,6 +290,7 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     } else if (opcion == 5)
     {
         cout << "\nCerrando sesion...\n\n";
+        this->conexionSesion.cerrar();
         mostrarMenuInicial();
     }else if( opcion == 6)
     {
@@ -534,8 +507,8 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     cout << "\nQUE DESEA EDITAR\n";
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
-    cout << "3) Contacto\n";
-    cout << "4) Direccion\n";
+    //cout << "3) Contacto\n";
+    //cout << "4) Direccion\n";
     cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
     opcion = pedirEntero("Seleccione una opcion: ");
@@ -680,5 +653,51 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
             mostrarMenuPrincipal(usuario_actual);
             return;
         }
+    }
+}
+
+// Declaración de la conexión persistente como miembro estático de la clase
+ConexionServidor MenusCliente::conexionSesion;
+
+bool ConexionServidor::conectar() {
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        cout << "Failed. Error Code : " << to_string(WSAGetLastError()) << endl;
+        return false;
+    }
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    if (s == INVALID_SOCKET) {
+        cout << "Could not create socket : " << to_string(WSAGetLastError()) << endl;
+        WSACleanup();
+        return false;
+    }
+    struct sockaddr_in server;
+    server.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(SERVER_PORT);
+    if (connect(s, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
+        cout << "Connection error: " << to_string(WSAGetLastError()) << endl;
+        closesocket(s);
+        WSACleanup();
+        return false;
+    }
+    conectada = true;
+    return true;
+}
+bool ConexionServidor::enviar(const string& mensaje, string& respuesta) {
+    if (!conectada) return false;
+    char recvBuff[512];
+    send(s, mensaje.c_str(), mensaje.length(), 0);
+    int bytesReceived = recv(s, recvBuff, sizeof(recvBuff), 0);
+    if (bytesReceived <= 0) return false;
+    recvBuff[bytesReceived] = '\0';
+    respuesta = recvBuff;
+    return true;
+}
+void ConexionServidor::cerrar() {
+    if (conectada) {
+        closesocket(s);
+        WSACleanup();
+        conectada = false;
     }
 }

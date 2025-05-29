@@ -1,6 +1,7 @@
 #ifndef MENUSCLIENTE_H
 #define MENUSCLIENTE_H
 
+#include <winsock2.h>
 #include "../Clases/Almacen.h"
 #include "../Clases/Pedido.h"
 #include "../Clases/Producto.h"
@@ -11,6 +12,17 @@
 #include <string>
 #include <map>
 using namespace std;
+
+// Clase auxiliar para gestionar la conexión persistente
+class ConexionServidor {
+public:
+    SOCKET s;
+    bool conectada;
+    ConexionServidor() : s(INVALID_SOCKET), conectada(false) {}
+    bool conectar();
+    bool enviar(const std::string& mensaje, std::string& respuesta);
+    void cerrar();
+};
 
 class MenusCliente
 {
@@ -24,7 +36,7 @@ private:
     map<int,int> cesta;
     vector<Producto> listaProductos;
 public:
-void cargarDatos();
+    void cargarDatos();
     int mandarAlServidor(const std::string &mensaje, std::string &respuesta);
     void mostrarMenuInicial();
     Usuario mostrarMenuRegistro();
@@ -41,6 +53,7 @@ void cargarDatos();
     void editarPerfil(Usuario& usuario_actual);
     void mostrarMenuMiPerfil(Usuario& usuario_actual);
     void eliminarPerfil(Usuario& usuario_actual);
+    static ConexionServidor conexionSesion;
 };
 
 #endif // MENUSCLIENTE_H
