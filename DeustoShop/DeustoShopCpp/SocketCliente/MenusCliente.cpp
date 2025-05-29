@@ -267,11 +267,13 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                         usuarios.push_back(usuario_actual);
                     }
                     guardarUsuariosCsv(usuarios);
-                    cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
-                    break;
-                } else {
-                    cout << "Respuesta inesperada del servidor: " << respuesta << endl;
                 }
+                cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
+                break;
+            } else if (respuesta == "EXITO") {
+                // Tratar EXITO como login correcto (caso especial)
+                cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
+                break;
             } else if (respuesta.rfind("ERROR;", 0) == 0) {
                 // Mensaje de error del servidor, por ejemplo: ERROR;Usuario no encontrado
                 cout << "Error del servidor: " << respuesta.substr(6) << endl;
@@ -533,8 +535,8 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
     cout << "3) Contacto\n";
-    //cout << "4) Direccion\n";
-    //cout << "5) Codigo Postal\n";
+    cout << "4) Direccion\n";
+    cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
     opcion = pedirEntero("Seleccione una opcion: ");
     if (opcion == -1 || opcion == 6) return;
