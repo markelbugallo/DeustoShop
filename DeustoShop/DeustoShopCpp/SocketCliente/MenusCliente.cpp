@@ -175,7 +175,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
 
     codigo_postal = pedirEntero("Codigo Postal: ");
     if (codigo_postal == -1) {
-        cout << "Volviendo al menú anterior..." << endl;
+        cout << "Volviendo al menu anterior..." << endl;
         return Usuario(); 
     }
     nuevoUsuario.setCodigo_postal(codigo_postal);
@@ -269,7 +269,7 @@ void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
     //mostrarListaProductos();
 
     char respuesta;
-    cout << "\n¿Quieres anyadir algún producto a tu cesta? (s/n): ";
+    cout << "\n¿Quieres anyadir algun producto a tu cesta? (s/n): ";
     cin >> respuesta;
 
     while (respuesta == 's' || respuesta == 'S') {
@@ -299,7 +299,7 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
     do {
         cout << "\n--- CESTA DE LA COMPRA ---\n";
         if (cesta.empty()) {
-            cout << "La cesta está vacía.\n";
+            cout << "La cesta esta vacia.\n";
         } else {
             cout << "ID\tCantidad\tPrecio\n";
             for (const auto& par : cesta) {
@@ -312,8 +312,8 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
         cout << "\n1) Borrar un producto\n";
         cout << "2) Vaciar cesta\n";
         cout << "3) Confirmar pedido\n";
-        cout << "4) Volver al menú principal\n";
-        cout << "Elige una opción: ";
+        cout << "4) Volver al menu principal\n";
+        cout << "Elige una opcion: ";
         cin >> opcion;
 
         if (opcion == 1 && !cesta.empty()) {
