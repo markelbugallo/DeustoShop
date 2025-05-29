@@ -25,20 +25,23 @@ private:
     vector<Producto> listaProductos;
     double obtenerPrecioProducto(int id_producto);
 public:
-    void cargarDatos();
+void cargarDatos();
+    int mandarAlServidor(const std::string &mensaje, std::string &respuesta);
     void mostrarMenuInicial();
     Usuario mostrarMenuRegistro();
     Usuario mostrarMenuInicioSesion();
-    void mostrarMenuPrincipal(Usuario usuario);
-    void mostrarMenuProductos(Usuario usuario);    
-    void mostrarTodosLosProductos(Usuario usuario);
-    void mostrarProductosPorCategoria(Usuario usuario);
-    void mostrarHistorialCompras(Usuario usuario);
-    void mostrarAlmacenes(Usuario usuario);
-    void mostrarMenuMiPerfil(Usuario usuario);
-    int mandarAlServidor(const string &mensaje, string &respuesta);
+    void mostrarMenuPrincipal(Usuario usuario_actual);
+    void mostrarMenuC(Usuario usuario_actual);
+    double obtenerPrecioProducto(int id_producto);
     void mostrarMenuCesta(Usuario& usuario_actual);
-    void mostrarMenuC(Usuario usuario);
+    void mostrarMenuProductos(Usuario usuario_actual);
+    void mostrarTodosLosProductos(Usuario usuario_actual);
+    void mostrarProductosPorCategoria(Usuario usuario_actual);
+    void mostrarHistorialCompras(Usuario usuario_actual);
+    void mostrarAlmacenes(Usuario usuario_actual);
+    void editarPerfil(Usuario& usuario_actual);
+    void mostrarMenuMiPerfil(Usuario& usuario_actual);
+    bool eliminarPerfil(Usuario& usuario_actual);
 };
 
 #endif // MENUSCLIENTE_H

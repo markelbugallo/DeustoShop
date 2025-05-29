@@ -4,10 +4,11 @@
 #include <sstream>
 #include "MenusCliente.h"
 #include "../Clases/Usuario.h"
-#include "../BD/Bd.h"
+#include "../BD/Bd.h" // Asegúrate de incluir esto para guardarUsuariosCsv
 #include "../Clases/Almacen.h"
 #include "../Clases/Utils.h"
 #include <set>
+#include <algorithm>
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -138,7 +139,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     cin >> nombre_usu;
     nuevoUsuario.setNombre_usuario(nombre_usu);
 
-    cout << "Contrasenya: ";
+    cout << "Contrasena: ";
     cin >> contrasena;
     nuevoUsuario.setContrasena_usuario(contrasena);
 
@@ -182,48 +183,89 @@ Usuario MenusCliente::mostrarMenuRegistro() {
 
     nuevoUsuario.setId_usuario(usuarios.size() + 1);
 
-    usuarios.push_back(nuevoUsuario); 
+    // Enviar registro al servidor
+    stringstream mensaje;
+    mensaje << "REGISTRAR_USUARIO;"
+            << nuevoUsuario.getId_usuario() << ";"
+            << nuevoUsuario.getNombre_usuario() << ";"
+            << nuevoUsuario.getContrasena_usuario() << ";"
+            << nuevoUsuario.getContacto_usuario() << ";"
+            << nuevoUsuario.getId_subscripcion() << ";"
+            << nuevoUsuario.getDireccion() << ";"
+            << nuevoUsuario.getCodigo_postal();
 
-    guardarUsuariosCsv(usuarios);
-
-    return nuevoUsuario;
+    string respuesta;
+    if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
+        // Actualiza objeto y CSV
+        vector<string> partes;
+        stringstream ss(respuesta);
+        string item;
+        while (getline(ss, item, ';')) partes.push_back(item);
+        if (partes.size() >= 8) {
+            nuevoUsuario.setId_usuario(stoi(partes[1]));
+            nuevoUsuario.setNombre_usuario(partes[2]);
+            nuevoUsuario.setContrasena_usuario(partes[3]);
+            nuevoUsuario.setContacto_usuario(partes[4]);
+            nuevoUsuario.setId_subscripcion(stoi(partes[5]));
+            nuevoUsuario.setDireccion(partes[6]);
+            nuevoUsuario.setCodigo_postal(stoi(partes[7]));
+        }
+        usuarios.push_back(nuevoUsuario);
+        guardarUsuariosCsv(usuarios);
+        // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
+        cout << "Usuario registrado correctamente.\n";
+        return nuevoUsuario;
+    } else if (respuesta.rfind("ERROR;", 0) == 0) {
+        cout << "Error del servidor: " << respuesta.substr(6) << endl;
+        return Usuario();
+    } else {
+        cout << "Error al registrar usuario en el servidor.\n";
+        return Usuario();
+    }
 }
 
 Usuario MenusCliente::mostrarMenuInicioSesion() {
-
     Usuario usuario_actual;
-    string nombre;
-    string contra;
+    string nombre, contra;
 
-    while (true)
-    {
+    while (true) {
         cout << "\n\nNombre de usuario: ";
         cin >> nombre;
+        cout << endl << "Contrasena: ";
+        cin >> contra;
 
-        if (usuariosContrasenas.find(nombre) == usuariosContrasenas.end())
-        {
-            cout << endl << "Ese nombre de usuario no esta registrado." << endl;
-        } else {
-            cout << endl << "Contrasenya: ";
-            cin >> contra;
-
-            if (usuariosContrasenas[nombre] != contra)
-            {
-                cout << endl << "Contrasenya incorrecta" << endl;
+        // Consultar al servidor
+        stringstream mensaje;
+        mensaje << "LOGIN;" << nombre << ";" << contra;
+        string respuesta;
+        if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+            if (respuesta.rfind("OK;", 0) == 0) {
+                vector<string> partes;
+                stringstream ss(respuesta);
+                string item;
+                while (getline(ss, item, ';')) partes.push_back(item);
+                if (partes.size() >= 8) {
+                    usuario_actual.setId_usuario(stoi(partes[1]));
+                    usuario_actual.setNombre_usuario(partes[2]);
+                    usuario_actual.setContrasena_usuario(partes[3]);
+                    usuario_actual.setContacto_usuario(partes[4]);
+                    usuario_actual.setId_subscripcion(stoi(partes[5]));
+                    usuario_actual.setDireccion(partes[6]);
+                    usuario_actual.setCodigo_postal(stoi(partes[7]));
+                    cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
+                    break;
+                } else {
+                    cout << "Respuesta inesperada del servidor: " << respuesta << endl;
+                }
+            } else if (respuesta.rfind("ERROR;", 0) == 0) {
+                cout << "Error del servidor: " << respuesta.substr(6) << endl;
             } else {
-                cout << endl << "Inicio de sesion correcto" << endl << endl;
-                break;
+                cout << "Respuesta inesperada del servidor: " << respuesta << endl;
             }
+        } else {
+            cout << "Error de conexion con el servidor." << endl;
         }
     }
-    
-    for (Usuario u : usuarios) {
-        if (u.getNombre_usuario() == nombre && u.getContrasena_usuario() == contra)
-        {
-            usuario_actual = u;
-        }
-    }
-    
     return usuario_actual;
 }
 
@@ -465,34 +507,154 @@ void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
     
 }
 
-void MenusCliente::mostrarMenuMiPerfil(Usuario usuario_actual) {
+void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     int opcion;
+    string nuevoValor;
+    cout << "\n¿QUE DESEA EDITAR?\n";
+    cout << "1) Nombre\n";
+    cout << "2) Contrasena\n";
+    cout << "3) Contacto\n";
+    cout << "4) Direccion\n";
+    cout << "5) Codigo Postal\n";
+    cout << "6) Volver\n";
+    opcion = pedirEntero("Seleccione una opcion: ");
+    if (opcion == -1 || opcion == 6) return;
 
-    cout << "\n\nMI PERFIL\n" << "---------" << endl;
-
-    
-    usuario_actual.imprimirUsuario(usuario_actual);
-
-
-    cout <<  endl << "1) Modificar datos" << endl;
-    cout << "2) Eliminar perfil" << endl;
-    cout << "3) Volver al menu principal" << endl;
-    opcion = pedirEntero("\nElija una opcion: ");
-    if (opcion == -1) return;
-
-    if (opcion == 1)
-    {
-        cout << "Modificar datos" << endl;
-        mostrarMenuMiPerfil(usuario_actual);
-
-    usuario_actual.modificarUsuarioPorId(usuario_actual);
-    } else if (opcion == 2)
-    {
-        cout << "Eliminar perfil" << endl;
-        mostrarMenuMiPerfil(usuario_actual);
-    } else if (opcion == 3)
-    {
-        cout << "Volviendo al menu principal..." << endl;
-        mostrarMenuPrincipal(usuario_actual);
+    switch (opcion) {
+        case 1:
+            cout << "Nuevo nombre: ";
+            getline(cin >> ws, nuevoValor);
+            usuario_actual.setNombre_usuario(nuevoValor);
+            break;
+        case 2:
+            cout << "Nueva contrasena: ";
+            getline(cin >> ws, nuevoValor);
+            usuario_actual.setContrasena_usuario(nuevoValor);
+            break;
+        case 3:
+            cout << "Nuevo contacto: ";
+            getline(cin >> ws, nuevoValor);
+            usuario_actual.setContacto_usuario(nuevoValor);
+            break;
+        case 4:
+            cout << "Nueva direccion: ";
+            getline(cin >> ws, nuevoValor);
+            usuario_actual.setDireccion(nuevoValor);
+            break;
+        case 5:
+            int nuevoCP;
+            cout << "Nuevo codigo postal: ";
+            cin >> nuevoCP;
+            usuario_actual.setCodigo_postal(nuevoCP);
+            break;
+        default:
+            cout << "Opcion no valida.\n";
+            return;
     }
+
+    // Enviar actualización al servidor
+    stringstream mensaje;
+    mensaje << "EDITAR_USUARIO;"
+            << usuario_actual.getId_usuario() << ";"
+            << usuario_actual.getNombre_usuario() << ";"
+            << usuario_actual.getContrasena_usuario() << ";"
+            << usuario_actual.getContacto_usuario() << ";"
+            << usuario_actual.getId_subscripcion() << ";"
+            << usuario_actual.getDireccion() << ";"
+            << usuario_actual.getCodigo_postal();
+
+    string respuesta;
+    if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
+        vector<string> partes;
+        stringstream ss(respuesta);
+        string item;
+        while (getline(ss, item, ';')) partes.push_back(item);
+        if (partes.size() >= 8) {
+            usuario_actual.setId_usuario(stoi(partes[1]));
+            usuario_actual.setNombre_usuario(partes[2]);
+            usuario_actual.setContrasena_usuario(partes[3]);
+            usuario_actual.setContacto_usuario(partes[4]);
+            usuario_actual.setId_subscripcion(stoi(partes[5]));
+            usuario_actual.setDireccion(partes[6]);
+            usuario_actual.setCodigo_postal(stoi(partes[7]));
+        }
+        for (auto& u : usuarios) {
+            if (u.getId_usuario() == usuario_actual.getId_usuario()) {
+                u = usuario_actual;
+                break;
+            }
+        }
+        guardarUsuariosCsv(usuarios);
+        // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
+        cout << "Perfil actualizado correctamente (servidor y local).\n";
+    } else if (respuesta.rfind("ERROR;", 0) == 0) {
+        cout << "Error del servidor: " << respuesta.substr(6) << endl;
+    } else {
+        cout << "Error al actualizar el perfil en el servidor. Cambios NO guardados localmente.\n";
+    }
+}
+
+// Modifica mostrarMenuMiPerfil para llamar a editarPerfil
+void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
+    int opcion;
+    bool salir = false;
+    while (!salir) {
+        cout << "\n\nMI PERFIL\n" << "---------" << endl;
+        usuario_actual.imprimirUsuario(usuario_actual);
+
+        cout << endl << "1) Modificar datos" << endl;
+        cout << "2) Eliminar perfil" << endl;
+        cout << "3) Volver al menu principal" << endl;
+        opcion = pedirEntero("\nElija una opcion: ");
+        if (opcion == -1) return;
+
+        if (opcion == 1) {
+            editarPerfil(usuario_actual);
+            // Ya se actualiza usuario_actual, solo refrescamos la vista
+            // No reiniciar sesion ni pedir datos antiguos
+        } else if (opcion == 2) {
+            if (eliminarPerfil(usuario_actual)) {
+                // Si se elimina, salir al menu principal
+                mostrarMenuPrincipal(Usuario());
+                return;
+            }
+            // Si no, volvemos a mostrar el menu de perfil
+        } else if (opcion == 3) {
+            cout << "Volviendo al menu principal..." << endl;
+            mostrarMenuPrincipal(usuario_actual);
+            return;
+        }
+    }
+}
+
+bool MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
+    cout << "¿Seguro que quieres eliminar tu perfil? (s/n): ";
+    char confirm;
+    cin >> confirm;
+    if (confirm != 's' && confirm != 'S') return false;
+
+    stringstream mensaje;
+    mensaje << "ELIMINAR_USUARIO;" << usuario_actual.getId_usuario();
+    string respuesta;
+    if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+        if (respuesta.rfind("OK", 0) == 0) {
+            // Elimina localmente
+            usuarios.erase(
+                remove_if(usuarios.begin(), usuarios.end(),
+                    [&](const Usuario& u) { return u.getId_usuario() == usuario_actual.getId_usuario(); }),
+                usuarios.end()
+            );
+            guardarUsuariosCsv(usuarios);
+            // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
+            cout << "Perfil eliminado correctamente.\n";
+            return true;
+        } else if (respuesta.rfind("ERROR;", 0) == 0) {
+            cout << "Error del servidor: " << respuesta.substr(6) << endl;
+        } else {
+            cout << "Error al eliminar el perfil en el servidor. Respuesta: " << respuesta << endl;
+        }
+    } else {
+        cout << "Error de conexion con el servidor.\n";
+    }
+    return false;
 }
