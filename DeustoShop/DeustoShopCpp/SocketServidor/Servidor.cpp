@@ -4,6 +4,7 @@
 #include <cstring>
 #include <winsock2.h>
 #include <sstream>
+#include <vector>
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 using namespace std;
@@ -74,13 +75,153 @@ int main() {
     //SEND and RECEIVE data
 	cout << "Esperando mensajes entrantes del cliente... " << endl;
 	do {
-		int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
+		int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff) - 1, 0);
 		if (bytes > 0) {
+			recvBuff[bytes] = '\0';
 			cout << "Recibiendo mensaje... " << endl;
 			cout << "Datos recibidos:  " << recvBuff << endl;
 
-			cout << "Mandando respuesta... " << endl;
-			strcpy(sendBuff, "EXITO");
+			string respuestaServidor = "";
+			stringstream ss(recvBuff);
+			string comando;
+			getline(ss, comando, ';');
+			if (comando == "LOGIN") {
+				string nombre, contrasena;
+				getline(ss, nombre, ';');
+				getline(ss, contrasena, ';');
+				// Buscar usuario en el CSV
+				FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
+				if (!f) {
+					respuestaServidor = "ERROR;No se pudo abrir el archivo de usuarios";
+				} else {
+					char linea[512];
+					bool encontrado = false;
+					fgets(linea, sizeof(linea), f); // Saltar cabecera
+					while (fgets(linea, sizeof(linea), f)) {
+						stringstream lss(linea);
+						string id, user, pass, contacto, id_sub, direccion, cp;
+						getline(lss, id, ';');
+						getline(lss, user, ';');
+						getline(lss, pass, ';');
+						getline(lss, contacto, ';');
+						getline(lss, id_sub, ';');
+						getline(lss, direccion, ';');
+						getline(lss, cp, ';');
+						// Limpiar salto de línea de cp
+						if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
+						if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
+						if (user == nombre && pass == contrasena) {
+							respuestaServidor = "OK;" + id + ";" + user + ";" + pass + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
+							encontrado = true;
+							break;
+						}
+					}
+					fclose(f);
+					if (!encontrado) {
+						respuestaServidor = "ERROR;Usuario no encontrado o contraseña incorrecta";
+					}
+				}
+			} else if (comando == "EDITAR_USUARIO") {
+                // Formato esperado: EDITAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
+                string id, nombre, contrasena, contacto, id_sub, direccion, cp;
+                getline(ss, id, ';');
+                getline(ss, nombre, ';');
+                getline(ss, contrasena, ';');
+                getline(ss, contacto, ';');
+                getline(ss, id_sub, ';');
+                getline(ss, direccion, ';');
+                getline(ss, cp, ';');
+                // Limpiar salto de línea de cp
+                if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
+                if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
+                // Leer todo el CSV y modificar la línea correspondiente
+                FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
+                if (!f) {
+                    respuestaServidor = "ERROR;No se pudo abrir el archivo de usuarios";
+                } else {
+                    vector<string> lineas;
+                    char linea[512];
+                    bool encontrado = false;
+                    // Leer cabecera
+                    if (fgets(linea, sizeof(linea), f)) {
+                        lineas.push_back(linea);
+                    }
+                    // Leer y modificar usuarios
+                    while (fgets(linea, sizeof(linea), f)) {
+                        stringstream lss(linea);
+                        string fid;
+                        getline(lss, fid, ';');
+                        if (fid == id) {
+                            // Reemplazar por los nuevos datos
+                            string nueva = id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp + "\n";
+                            lineas.push_back(nueva);
+                            encontrado = true;
+                        } else {
+                            lineas.push_back(linea);
+                        }
+                    }
+                    fclose(f);
+                    if (!encontrado) {
+                        respuestaServidor = "ERROR;Usuario no encontrado";
+                    } else {
+                        // Escribir el CSV actualizado
+                        FILE* fw = fopen("../../DeustoShopC/data/usuarios.csv", "w");
+                        if (!fw) {
+                            respuestaServidor = "ERROR;No se pudo escribir el archivo de usuarios";
+                        } else {
+                            for (const auto& l : lineas) fputs(l.c_str(), fw);
+                            fclose(fw);
+                            respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
+                        }
+                    }
+                }
+            } else if (comando == "ELIMINAR_USUARIO") {
+                // Formato esperado: ELIMINAR_USUARIO;id
+                string id;
+                getline(ss, id, ';');
+                // Leer todo el CSV y eliminar la línea correspondiente
+                FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
+                if (!f) {
+                    respuestaServidor = "ERROR;No se pudo abrir el archivo de usuarios";
+                } else {
+                    vector<string> lineas;
+                    char linea[512];
+                    bool eliminado = false;
+                    // Leer cabecera
+                    if (fgets(linea, sizeof(linea), f)) {
+                        lineas.push_back(linea);
+                    }
+                    // Leer y filtrar usuarios
+                    while (fgets(linea, sizeof(linea), f)) {
+                        stringstream lss(linea);
+                        string fid;
+                        getline(lss, fid, ';');
+                        if (fid == id) {
+                            eliminado = true; // No añadir esta línea
+                        } else {
+                            lineas.push_back(linea);
+                        }
+                    }
+                    fclose(f);
+                    if (!eliminado) {
+                        respuestaServidor = "ERROR;Usuario no encontrado";
+                    } else {
+                        // Escribir el CSV actualizado
+                        FILE* fw = fopen("../../DeustoShopC/data/usuarios.csv", "w");
+                        if (!fw) {
+                            respuestaServidor = "ERROR;No se pudo escribir el archivo de usuarios";
+                        } else {
+                            for (const auto& l : lineas) fputs(l.c_str(), fw);
+                            fclose(fw);
+                            respuestaServidor = "OK";
+                        }
+                    }
+                }
+            } else {
+				// Respuesta por defecto para otros comandos
+				respuestaServidor = "EXITO";
+			}
+			strcpy(sendBuff, respuestaServidor.c_str());
             send(comm_socket, sendBuff, strlen(sendBuff), 0);
 			cout << "Datos enviados: " << sendBuff << endl;
 

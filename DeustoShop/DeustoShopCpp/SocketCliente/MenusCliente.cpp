@@ -239,11 +239,13 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
         mensaje << "LOGIN;" << nombre << ";" << contra;
         string respuesta;
         if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+            // El servidor debe responder con OK;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
             if (respuesta.rfind("OK;", 0) == 0) {
                 vector<string> partes;
                 stringstream ss(respuesta);
                 string item;
                 while (getline(ss, item, ';')) partes.push_back(item);
+                // partes[0] = "OK", partes[1] = id, partes[2] = nombre, ...
                 if (partes.size() >= 8) {
                     usuario_actual.setId_usuario(stoi(partes[1]));
                     usuario_actual.setNombre_usuario(partes[2]);
@@ -252,14 +254,29 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                     usuario_actual.setId_subscripcion(stoi(partes[5]));
                     usuario_actual.setDireccion(partes[6]);
                     usuario_actual.setCodigo_postal(stoi(partes[7]));
+                    // Actualizar usuarios locales y CSV para reflejar los datos correctos
+                    bool found = false;
+                    for (auto& u : usuarios) {
+                        if (u.getId_usuario() == usuario_actual.getId_usuario()) {
+                            u = usuario_actual;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        usuarios.push_back(usuario_actual);
+                    }
+                    guardarUsuariosCsv(usuarios);
                     cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
                     break;
                 } else {
                     cout << "Respuesta inesperada del servidor: " << respuesta << endl;
                 }
             } else if (respuesta.rfind("ERROR;", 0) == 0) {
+                // Mensaje de error del servidor, por ejemplo: ERROR;Usuario no encontrado
                 cout << "Error del servidor: " << respuesta.substr(6) << endl;
             } else {
+                // Si la respuesta no es ni OK ni ERROR, mostrarla para depuración
                 cout << "Respuesta inesperada del servidor: " << respuesta << endl;
             }
         } else {
@@ -270,6 +287,7 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
 }
 
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
+    cargarDatos(); // Recarga usuarios y contraseñas desde el CSV
     int opcion = 0;
 
     cout << "\nMENU PRINCIPAL\n";
@@ -510,7 +528,7 @@ void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
 void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     int opcion;
     string nuevoValor;
-    cout << "\n¿QUE DESEA EDITAR?\n";
+    cout << "\nQUE DESEA EDITAR\n";
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
     cout << "3) Contacto\n";
@@ -546,6 +564,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
             cout << "Nuevo codigo postal: ";
             cin >> nuevoCP;
             usuario_actual.setCodigo_postal(nuevoCP);
+            cin.ignore();
             break;
         default:
             cout << "Opcion no valida.\n";
@@ -585,7 +604,6 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
             }
         }
         guardarUsuariosCsv(usuarios);
-        // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
         cout << "Perfil actualizado correctamente (servidor y local).\n";
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
@@ -637,7 +655,11 @@ bool MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
     mensaje << "ELIMINAR_USUARIO;" << usuario_actual.getId_usuario();
     string respuesta;
     if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
-        if (respuesta.rfind("OK", 0) == 0) {
+        // Limpiar posibles espacios y saltos de línea
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
+        // Aceptar tanto "OK" como "OK;"
+        if (respuesta == "OK" || respuesta == "OK;") {
             // Elimina localmente
             usuarios.erase(
                 remove_if(usuarios.begin(), usuarios.end(),
@@ -645,7 +667,6 @@ bool MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
                 usuarios.end()
             );
             guardarUsuariosCsv(usuarios);
-            // Si tienes función para BD local, llama aquí: guardarUsuariosEnBD(usuarios);
             cout << "Perfil eliminado correctamente.\n";
             return true;
         } else if (respuesta.rfind("ERROR;", 0) == 0) {
