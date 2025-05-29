@@ -12,10 +12,13 @@
 #define SERVER_PORT 6000
 using namespace std;
 
+
+
 int main() {
 
     WSADATA wsaData;
     SOCKET conn_socket;     // socket que escucha
+    SOCKET comm_socket;
     struct sockaddr_in server;
     struct sockaddr_in client;
     char sendBuff[512], recvBuff[512];
@@ -58,21 +61,17 @@ int main() {
 
     cout << "Esperando conexiones..." << endl;
     int stsize = sizeof(struct sockaddr);
-    while (true) {
-        SOCKET comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize);
-        if (comm_socket == INVALID_SOCKET) {
-            cout << "Accept failed with error code : " << to_string(WSAGetLastError()) << endl;
-            continue;
-        }
+    while ( (comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize)) != INVALID_SOCKET) {
+        
         cout << "Conexion aceptada." << endl;
         cout << "Conexion entrante desde: " << inet_ntoa(client.sin_addr) << " (" << ntohs(client.sin_port) << ")" << endl;
-
-        // Cada conexión acepta varios mensajes hasta que el cliente cierre la conexión.
-        // Si el cliente quiere "cerrar sesión" o "registrar otro usuario", debe abrir una nueva conexión.
         cout << "Esperando mensajes entrantes del cliente... " << endl;
-        while (true) {
-            int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff) - 1, 0);
-            if (bytes <= 0) break; // Cliente cerró la conexión
+
+        int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
+        if (bytes == SOCKET_ERROR) {
+            cout << "Error al recibir datos: " <<  to_string(WSAGetLastError());
+        } else {
+
             recvBuff[bytes] = '\0';
             cout << "Recibiendo mensaje... " << endl;
             cout << "Datos recibidos:  " << recvBuff << endl;
@@ -81,45 +80,41 @@ int main() {
             stringstream ss(recvBuff);
             string comando;
             getline(ss, comando, ';');
-            bool cerrarConexionTrasRespuesta = false;
+            
             if (comando == "LOGIN") {
-                string nombre, contrasena;
+                cargarDatos();
+                string id, nombre, contrasena, contacto, id_sub, direccion, cp;
                 getline(ss, nombre, ';');
                 getline(ss, contrasena, ';');
-                // Buscar usuario en el CSV
-                FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
-                if (!f) {
-                    respuestaServidor = "ERROR;No se pudo abrir el archivo de usuarios";
-                } else {
-                    char linea[512];
-                    bool encontrado = false;
-                    fgets(linea, sizeof(linea), f); // Saltar cabecera
-                    while (fgets(linea, sizeof(linea), f)) {
-                        stringstream lss(linea);
-                        string id, user, pass, contacto, id_sub, direccion, cp;
-                        getline(lss, id, ';');
-                        getline(lss, user, ';');
-                        getline(lss, pass, ';');
-                        getline(lss, contacto, ';');
-                        getline(lss, id_sub, ';');
-                        getline(lss, direccion, ';');
-                        getline(lss, cp, ';');
-                        // Limpiar salto de línea de cp
-                        if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
-                        if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
-                        if (user == nombre && pass == contrasena) {
-                            respuestaServidor = "OK;" + id + ";" + user + ";" + pass + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
-                            encontrado = true;
-                            break;
+
+                auto usuarioEncontrado = usuariosContrasenas.find(nombre);
+                if (usuarioEncontrado != usuariosContrasenas.end()) {
+                    if (usuariosContrasenas[nombre] == contrasena)
+                    {
+                        for (Usuario u : usuarios) {
+                            if (u.getNombre_usuario() == nombre)
+                            {
+                                id = to_string(u.getId_usuario());
+                                contacto = u.getContacto_usuario();
+                                id_sub = to_string(u.getId_subscripcion());
+                                direccion = u.getDireccion();
+                                cp = to_string(u.getCodigo_postal());
+                            }    
                         }
+                        
+                        respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
+                    } else {
+                        cout << "Contrasena incorrecta" << endl;
                     }
-                    fclose(f);
-                    if (!encontrado) {
-                        respuestaServidor = "ERROR;Usuario no encontrado o contraseña incorrecta";
-                    }
+                    
+                } else {
+                    cout << "Usuario no registrado" << endl;
+                    respuestaServidor = "ERROR;Usuario no encontrado o contrasena incorrecta";
                 }
-                cerrarConexionTrasRespuesta = true;
+                
+
             } else if (comando == "REGISTRAR_USUARIO") {
+                cargarDatos();
                 // Formato esperado: REGISTRAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
                 string id, nombre, contrasena, contacto, id_subscripcion, direccion, codigo_postal;
                 getline(ss, id, ';');
@@ -130,8 +125,6 @@ int main() {
                 getline(ss, direccion, ';');
                 getline(ss, codigo_postal, ';');
 
-                // Cargar usuarios existentes
-                vector<Usuario> usuarios = cargarUsuariosCSV("../../DeustoShopC/data/usuarios.csv");
                 // Comprobar si el usuario ya existe
                 bool existe = false;
                 for (const auto& u : usuarios) {
@@ -154,7 +147,7 @@ int main() {
                     // Devolver los datos del usuario registrado
                     respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
                 }
-                cerrarConexionTrasRespuesta = true;
+               
             } else if (comando == "EDITAR_USUARIO") {
                 // Formato esperado: EDITAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
                 string id, nombre, contrasena, contacto, id_subscripcion, direccion, codigo_postal;
@@ -166,7 +159,7 @@ int main() {
                 getline(ss, direccion, ';');
                 getline(ss, codigo_postal, ';');
 
-                vector<Usuario> usuarios = cargarUsuariosCSV("../../DeustoShopC/data/usuarios.csv");
+                
                 bool actualizado = false;
                 for (auto& u : usuarios) {
                     if (to_string(u.getId_usuario()) == id) {
@@ -186,7 +179,7 @@ int main() {
                     guardarUsuariosCsv(usuarios);
                     respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
                 }
-                cerrarConexionTrasRespuesta = true;
+                
             } else if (comando == "ELIMINAR_USUARIO") {
                 // Formato esperado: ELIMINAR_USUARIO;id
                 string id;
@@ -209,13 +202,23 @@ int main() {
                 // Respuesta por defecto para otros comandos
                 respuestaServidor = "ERROR;Comando no reconocido";
             }
-            send(comm_socket, respuestaServidor.c_str(), respuestaServidor.size(), 0);
-            cout << "Datos enviados: " << respuestaServidor << endl;
-            if (cerrarConexionTrasRespuesta) break;
+            
+            if (bytes == SOCKET_ERROR) {
+                cout << "Error al enviar datos" << to_string(WSAGetLastError()) << endl;
+            } else {
+                send(comm_socket, respuestaServidor.c_str(), respuestaServidor.size(), 0);
+                cout << "Datos enviados: " << respuestaServidor << endl;
+            }
+            closesocket(comm_socket);
         }
-        // Cerrar la conexión con el cliente actual
-        closesocket(comm_socket);
-        cout << "Cliente desconectado. Esperando nueva conexion..." << endl;
+
+        if (comm_socket == INVALID_SOCKET) {
+            cout << "accept fallo: " + to_string(WSAGetLastError());
+            closesocket(conn_socket);
+            WSACleanup();
+            return 1;
+        }
+          
     }
 
     // Cerrar el socket de escucha y limpiar Winsock al terminar el programa

@@ -3,6 +3,7 @@
 #include <string>
 using namespace std;
 #include "Usuario.h"
+#include "../SocketCliente/MenusCliente.h"
 
 // constructor
 Pedido::Pedido(
@@ -53,7 +54,7 @@ void Pedido::imprimirInfPedido() const{
     cout << "-------------------------------------------------------------" << endl << endl;
 }
 
-map<int, int> Pedido::realizarPedidoInteractivo() {
+map<int, int> Pedido::realizarPedidoInteractivo(Usuario usuario_actual) {
     map<int, int> productosCantidades;
     int id_producto, cantidad;
 
@@ -72,6 +73,13 @@ map<int, int> Pedido::realizarPedidoInteractivo() {
         }
         cout << "Introduce el ID del siguiente producto (0 para terminar): ";
         cin >> id_producto;
+
+        if (id_producto == 0)
+        {
+            MenusCliente menu;
+            menu.mostrarMenuPrincipal(usuario_actual);
+        }
+        
     }
 
     return productosCantidades;

@@ -18,7 +18,14 @@ vector<Proveedor> cargarProveedoresCSV(const string &fichero);
 vector<Subscripcion> cargarSubscripcionesCSV(const string &fichero);
 vector<Usuario> cargarUsuariosCSV(const string &fichero);
 void guardarUsuariosCsv(const vector<Usuario>& usuarios);
+void cargarDatos();
 
 // mapa para almacenar usuarios y sus contraseñas para el login
 extern map<string, string> usuariosContrasenas;
+extern vector<Almacen> almacenes;
+extern vector<Pedido> pedidos;
+extern vector<Producto> productos;
+extern vector<Proveedor> proveedores;
+extern vector<Subscripcion> subscripciones;
+extern vector<Usuario> usuarios;
 #endif // BD_H

@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+class Usuario;
 using namespace std;
 
 struct Fecha
@@ -55,7 +56,7 @@ public:
     string getDireccion() const;
     int getCodigo_Postal() const;
     void imprimirInfPedido() const;
-     static map<int, int> realizarPedidoInteractivo();
+    static map<int, int> realizarPedidoInteractivo(Usuario usuario_actual);
 };
 
 #endif // PEDIDO_H
