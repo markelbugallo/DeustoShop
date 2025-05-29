@@ -5,6 +5,8 @@
 #include <winsock2.h>
 #include <sstream>
 #include <vector>
+#include "../../DeustoShopCpp/Clases/Usuario.h"
+#include "../../DeustoShopCpp/BD/Bd.h"
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 using namespace std;
@@ -127,37 +129,29 @@ int main() {
                 getline(ss, direccion, ';');
                 getline(ss, codigo_postal, ';');
 
+                // Cargar usuarios existentes
+                vector<Usuario> usuarios = cargarUsuariosCSV("../../DeustoShopC/data/usuarios.csv");
                 // Comprobar si el usuario ya existe
-                FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
                 bool existe = false;
-                if (f) {
-                    char linea[512];
-                    fgets(linea, sizeof(linea), f); // Saltar cabecera
-                    while (fgets(linea, sizeof(linea), f)) {
-                        stringstream lss(linea);
-                        string fid, fnombre;
-                        getline(lss, fid, ';');
-                        getline(lss, fnombre, ';');
-                        if (fnombre == nombre) {
-                            existe = true;
-                            break;
-                        }
+                for (const auto& u : usuarios) {
+                    if (u.getNombre_usuario() == nombre) {
+                        existe = true;
+                        break;
                     }
-                    fclose(f);
                 }
                 if (existe) {
                     respuestaServidor = "ERROR;El usuario ya existe";
                 } else {
-                    // Añadir usuario al CSV
-                    FILE* fw = fopen("../../DeustoShopC/data/usuarios.csv", "a");
-                    if (!fw) {
-                        respuestaServidor = "ERROR;No se pudo escribir el archivo de usuarios";
-                    } else {
-                        fprintf(fw, "%s;%s;%s;%s;%s;%s;%s\n", id.c_str(), nombre.c_str(), contrasena.c_str(), contacto.c_str(), id_subscripcion.c_str(), direccion.c_str(), codigo_postal.c_str());
-                        fclose(fw);
-                        // Devolver los datos del usuario registrado
-                        respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
-                    }
+                    // Crear nuevo usuario y añadirlo a la lista
+                    Usuario nuevoUsuario(
+                        stoi(id), nombre, contrasena, contacto,
+                        stoi(id_subscripcion), direccion, stoi(codigo_postal)
+                    );
+                    usuarios.push_back(nuevoUsuario);
+                    // Guardar todos los usuarios en el CSV
+                    guardarUsuariosCsv(usuarios);
+                    // Devolver los datos del usuario registrado
+                    respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
                 }
                 cerrarConexionTrasRespuesta = true;
             } else if (comando == "EDITAR_USUARIO") {
