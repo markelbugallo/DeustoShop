@@ -23,7 +23,6 @@ private:
     vector<Usuario> usuarios;
     map<int,int> cesta;
     vector<Producto> listaProductos;
-    double obtenerPrecioProducto(int id_producto);
 public:
 void cargarDatos();
     int mandarAlServidor(const std::string &mensaje, std::string &respuesta);
