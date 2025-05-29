@@ -1,6 +1,7 @@
 #ifndef MENUSCLIENTE_H
 #define MENUSCLIENTE_H
 
+#include <winsock2.h>
 #include "../Clases/Almacen.h"
 #include "../Clases/Pedido.h"
 #include "../Clases/Producto.h"
@@ -35,7 +36,7 @@ private:
     map<int,int> cesta;
     vector<Producto> listaProductos;
 public:
-void cargarDatos();
+    void cargarDatos();
     int mandarAlServidor(const std::string &mensaje, std::string &respuesta);
     void mostrarMenuInicial();
     Usuario mostrarMenuRegistro();
