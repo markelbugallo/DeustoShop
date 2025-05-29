@@ -12,6 +12,17 @@
 #include <map>
 using namespace std;
 
+// Clase auxiliar para gestionar la conexión persistente
+class ConexionServidor {
+public:
+    SOCKET s;
+    bool conectada;
+    ConexionServidor() : s(INVALID_SOCKET), conectada(false) {}
+    bool conectar();
+    bool enviar(const std::string& mensaje, std::string& respuesta);
+    void cerrar();
+};
+
 class MenusCliente
 {
 private:
@@ -41,6 +52,7 @@ void cargarDatos();
     void editarPerfil(Usuario& usuario_actual);
     void mostrarMenuMiPerfil(Usuario& usuario_actual);
     void eliminarPerfil(Usuario& usuario_actual);
+    static ConexionServidor conexionSesion;
 };
 
 #endif // MENUSCLIENTE_H
