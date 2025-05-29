@@ -533,10 +533,9 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
     cout << "3) Contacto\n";
-    cout << "4) Direccion\n";
-    cout << "5) Codigo Postal\n";
+    //cout << "4) Direccion\n";
+    //cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
-    cout << "7) Eliminar perfil\n";
     opcion = pedirEntero("Seleccione una opcion: ");
     if (opcion == -1 || opcion == 6) return;
 
