@@ -122,58 +122,56 @@ int main() {
                 cerrarConexionTrasRespuesta = true;
             } else if (comando == "EDITAR_USUARIO") {
                 // Formato esperado: EDITAR_USUARIO;id;nombre;contrasena;contacto;id_subscripcion;direccion;codigo_postal
-                string id, nombre, contrasena, contacto, id_sub, direccion, cp;
+                string id, nombre, contrasena, contacto, id_subscripcion, direccion, codigo_postal;
                 getline(ss, id, ';');
                 getline(ss, nombre, ';');
                 getline(ss, contrasena, ';');
                 getline(ss, contacto, ';');
-                getline(ss, id_sub, ';');
+                getline(ss, id_subscripcion, ';');
                 getline(ss, direccion, ';');
-                getline(ss, cp, ';');
-                // Limpiar salto de línea de cp
-                if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
-                if (!cp.empty() && (cp.back() == '\n' || cp.back() == '\r')) cp.pop_back();
-                cout << "[DEBUG] EDITAR_USUARIO: id=" << id << ", nombre=" << nombre << ", contrasena=" << contrasena << ", contacto=" << contacto << ", id_sub=" << id_sub << ", direccion=" << direccion << ", cp=" << cp << endl;
+                getline(ss, codigo_postal, ';');
+
+                // Abrir el CSV y cargar todos los usuarios
                 FILE* f = fopen("../../DeustoShopC/data/usuarios.csv", "r");
                 if (!f) {
-                    cout << "[ERROR] No se pudo abrir el archivo de usuarios para lectura" << endl;
                     respuestaServidor = "ERROR;No se pudo abrir el archivo de usuarios";
                 } else {
                     vector<string> lineas;
                     char linea[512];
-                    bool encontrado = false;
+                    bool actualizado = false;
                     // Leer cabecera
                     if (fgets(linea, sizeof(linea), f)) {
                         lineas.push_back(linea);
                     }
-                    // Leer y modificar usuarios
+                    // Leer y actualizar usuario
                     while (fgets(linea, sizeof(linea), f)) {
                         stringstream lss(linea);
                         string fid;
                         getline(lss, fid, ';');
                         if (fid == id) {
-                            string nueva = id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp + "\n";
-                            cout << "[DEBUG] Modificando usuario id=" << id << " con nueva linea: " << nueva;
-                            lineas.push_back(nueva);
-                            encontrado = true;
+                            // Usuario encontrado, actualiza la línea
+                            string nuevaLinea = id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" +
+                                                id_subscripcion + ";" + direccion + ";" + codigo_postal + "\n";
+                            lineas.push_back(nuevaLinea);
+                            actualizado = true;
                         } else {
                             lineas.push_back(linea);
                         }
                     }
                     fclose(f);
-                    if (!encontrado) {
-                        cout << "[ERROR] Usuario no encontrado para editar: id=" << id << endl;
+                    if (!actualizado) {
                         respuestaServidor = "ERROR;Usuario no encontrado";
                     } else {
+                        // Escribir el CSV actualizado
                         FILE* fw = fopen("../../DeustoShopC/data/usuarios.csv", "w");
                         if (!fw) {
-                            cout << "[ERROR] No se pudo abrir el archivo de usuarios para escritura" << endl;
                             respuestaServidor = "ERROR;No se pudo escribir el archivo de usuarios";
                         } else {
                             for (const auto& l : lineas) fputs(l.c_str(), fw);
                             fclose(fw);
-                            cout << "[DEBUG] Usuario actualizado correctamente en el CSV." << endl;
-                            respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
+                            // Devuelve la respuesta esperada por el cliente
+                            respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" +
+                                                id_subscripcion + ";" + direccion + ";" + codigo_postal;
                         }
                     }
                 }
@@ -223,8 +221,7 @@ int main() {
                 // Respuesta por defecto para otros comandos
                 respuestaServidor = "EXITO";
             }
-            strcpy(sendBuff, respuestaServidor.c_str());
-            send(comm_socket, sendBuff, strlen(sendBuff), 0);
+            send(comm_socket, respuestaServidor.c_str(), respuestaServidor.size(), 0);
             cout << "Datos enviados: " << sendBuff << endl;
             if (cerrarConexionTrasRespuesta) break;
         }

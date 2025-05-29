@@ -4,7 +4,7 @@
 #include <sstream>
 #include "MenusCliente.h"
 #include "../Clases/Usuario.h"
-#include "../BD/Bd.h" // Asegúrate de incluir esto para guardarUsuariosCsv
+#include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
 #include "../Clases/Utils.h"
 #include <set>
@@ -12,17 +12,6 @@
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
-
-// Clase auxiliar para gestionar la conexión persistente
-class ConexionServidor {
-public:
-    SOCKET s;
-    bool conectada;
-    ConexionServidor() : s(INVALID_SOCKET), conectada(false) {}
-    bool conectar();
-    bool enviar(const string& mensaje, string& respuesta);
-    void cerrar();
-};
 
 // Definición del miembro estático para la conexión persistente
 ConexionServidor MenusCliente::conexionSesion;
@@ -559,37 +548,45 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
             << usuario_actual.getCodigo_postal();
 
     string respuesta;
-    if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
-        vector<string> partes;
-        stringstream ss(respuesta);
-        string item;
-        while (getline(ss, item, ';')) partes.push_back(item);
-        if (partes.size() >= 8) {
-            usuario_actual.setId_usuario(stoi(partes[1]));
-            usuario_actual.setNombre_usuario(partes[2]);
-            usuario_actual.setContrasena_usuario(partes[3]);
-            usuario_actual.setContacto_usuario(partes[4]);
-            usuario_actual.setId_subscripcion(stoi(partes[5]));
-            usuario_actual.setDireccion(partes[6]);
-            usuario_actual.setCodigo_postal(stoi(partes[7]));
-        }
-        for (auto& u : usuarios) {
-            if (u.getId_usuario() == usuario_actual.getId_usuario()) {
-                u = usuario_actual;
-                break;
+    if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+        // Limpia saltos de línea
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
+        respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
+
+        // DEBUG: imprime la respuesta real del servidor
+        cout << "DEBUG: Respuesta del servidor: " << respuesta << endl;
+
+        if (respuesta.rfind("OK;", 0) == 0) {
+            // Procesa la respuesta y actualiza usuario_actual
+            vector<string> partes;
+            stringstream ss(respuesta);
+            string item;
+            while (getline(ss, item, ';')) partes.push_back(item);
+            if (partes.size() >= 8) {
+                usuario_actual.setId_usuario(stoi(partes[1]));
+                usuario_actual.setNombre_usuario(partes[2]);
+                usuario_actual.setContrasena_usuario(partes[3]);
+                usuario_actual.setContacto_usuario(partes[4]);
+                usuario_actual.setId_subscripcion(stoi(partes[5]));
+                usuario_actual.setDireccion(partes[6]);
+                usuario_actual.setCodigo_postal(stoi(partes[7]));
             }
+            // Actualiza localmente
+            for (auto& u : usuarios) {
+                if (u.getId_usuario() == usuario_actual.getId_usuario()) {
+                    u = usuario_actual;
+                    break;
+                }
+            }
+            guardarUsuariosCsv(usuarios);
+            cout << "Perfil actualizado correctamente (servidor y local).\n";
+        } else if (respuesta.rfind("ERROR;", 0) == 0) {
+            cout << "Error del servidor: " << respuesta.substr(6) << endl;
+        } else {
+            cout << "Error al actualizar el perfil en el servidor. Cambios NO guardados localmente.\n";
         }
-        guardarUsuariosCsv(usuarios);
-        // ACTUALIZA el mapa de usuariosContrasenas en memoria
-        if (nombre_anterior != usuario_actual.getNombre_usuario()) {
-            usuariosContrasenas.erase(nombre_anterior);
-        }
-        usuariosContrasenas[usuario_actual.getNombre_usuario()] = usuario_actual.getContrasena_usuario();
-        cout << "Perfil actualizado correctamente (servidor y local).\n";
-    } else if (respuesta.rfind("ERROR;", 0) == 0) {
-        cout << "Error del servidor: " << respuesta.substr(6) << endl;
     } else {
-        cout << "Error al actualizar el perfil en el servidor. Cambios NO guardados localmente.\n";
+        cout << "Error de conexion con el servidor.\n";
     }
 }
 
@@ -656,8 +653,7 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
     }
 }
 
-// Declaración de la conexión persistente como miembro estático de la clase
-ConexionServidor MenusCliente::conexionSesion;
+
 
 bool ConexionServidor::conectar() {
     WSADATA wsaData;

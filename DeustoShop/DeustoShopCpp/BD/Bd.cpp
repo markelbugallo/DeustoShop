@@ -274,7 +274,6 @@ vector<Usuario> cargarUsuariosCSV(const string &fichero) {
 }
 void guardarUsuariosCsv(const vector<Usuario>& usuarios) {
     ofstream file("../DeustoShopC/Data/usuarios.csv");
-    file << "id_usuario,nombre_usuario,contrasena_usuario,contacto_usuario,id_subscripcion,direccion,codigo_postal\n";
     for (const auto& u : usuarios) {
         file << u.getId_usuario() << ";"
              << u.getNombre_usuario() << ";"
