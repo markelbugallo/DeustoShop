@@ -28,4 +28,5 @@ extern vector<Producto> productos;
 extern vector<Proveedor> proveedores;
 extern vector<Subscripcion> subscripciones;
 extern vector<Usuario> usuarios;
+void guardarPedidosCsv(const vector<Pedido>& pedidos);
 #endif // BD_H

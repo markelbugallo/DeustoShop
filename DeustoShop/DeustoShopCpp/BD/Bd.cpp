@@ -285,6 +285,30 @@ void guardarUsuariosCsv(const vector<Usuario>& usuarios) {
     }
 }
 
+void guardarPedidosCsv(const vector<Pedido>& pedidos) {
+    ofstream file("../DeustoShopC/Data/pedidos.csv");
+    if (!file.is_open()) {
+        cout << "No se pudo abrir el archivo de pedidos para guardar." << endl;
+        return;
+    }
+    for (const auto& p : pedidos) {
+        file << p.getId_pedido() << ";"
+             << p.getFecha_pedido().toString() << ";"
+             << p.getEstado_pedido() << ";"
+             << p.getId_usuario() << ";";
+        // Serializar productos y cantidades
+        bool primero = true;
+        for (const auto& par : p.getProductosCantidades()) {
+            if (!primero) file << ",";
+            file << par.first << ":" << par.second;
+            primero = false;
+        }
+        file << ";" << p.getDireccion() << ";"
+             << p.getCodigo_Postal() << "\n";
+    }
+    file.close();
+}
+
 vector<Almacen> almacenes;
 vector<Pedido> pedidos;
 vector<Producto> productos;

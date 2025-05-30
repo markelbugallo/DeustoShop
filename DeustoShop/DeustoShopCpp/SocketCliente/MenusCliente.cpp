@@ -320,32 +320,46 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
         } else if (opcion == 2) {
             cesta.clear();
         } else if (opcion == 3 && !cesta.empty()) {
-            // Construir mensaje para el servidor
+            // Obtener fecha actual en formato YYYY-MM-DD
+            time_t t = time(nullptr);
+            tm* now = localtime(&t);
+            char fechaStr[11];
+            strftime(fechaStr, sizeof(fechaStr), "%Y-%m-%d", now);
+
+            // Calcular el nuevo id de pedido
+            int nuevo_id_pedido = pedidos.size() + 1;
+
+            // Construir mensaje en formato CSV
             stringstream mensaje;
-            mensaje << "REALIZAR_PEDIDO;"
-                    << usuario_actual.getId_usuario() << ";"
-                    << usuario_actual.getDireccion() << ";"
-                    << usuario_actual.getCodigo_postal() << ";";
+            mensaje << nuevo_id_pedido << ";"
+                    << fechaStr << ";"
+                    << "procesando solicitud" << ";"
+                    << usuario_actual.getId_usuario() << ";";
+
+            // Productos
             bool primero = true;
             for (const auto& par : cesta) {
                 if (!primero) mensaje << ",";
                 mensaje << par.first << ":" << par.second;
                 primero = false;
             }
+            mensaje << ";" << usuario_actual.getDireccion() << ";"
+                    << usuario_actual.getCodigo_postal();
+
             string respuesta;
             if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
                 cout << "¡Pedido realizado correctamente!\n";
-                // Si quieres, puedes crear el pedido localmente también:
                 Pedido nuevoPedido(
-                    0, 
-                    Fecha(), 
-                    "Pendiente", 
+                    nuevo_id_pedido,
+                    Fecha{now->tm_mday, now->tm_mon + 1, now->tm_year + 1900},
+                    "procesando solicitud",
                     usuario_actual.getId_usuario(),
                     cesta,
                     usuario_actual.getDireccion(),
                     usuario_actual.getCodigo_postal()
                 );
                 usuario_actual.agregarPedido(nuevoPedido);
+                pedidos.push_back(nuevoPedido);
                 cesta.clear();
                 mostrarMenuPrincipal(usuario_actual);
                 break;
@@ -361,7 +375,7 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
     } while (true);
 }
 
-
+//a
 void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     int opcion;
     do {

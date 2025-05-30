@@ -17,7 +17,7 @@
 
 using namespace std;
 
-void guardarPedidosCsv(const vector<Pedido>& pedidos) {
+/*void guardarPedidosCsv(const vector<Pedido>& pedidos) {
     ofstream file("pedidos.csv");
     for (const Pedido& p : pedidos) {
         file << p.getId_pedido() << ";"
@@ -33,7 +33,7 @@ void guardarPedidosCsv(const vector<Pedido>& pedidos) {
         file << ";" << p.getDireccion() << ";" << p.getCodigo_Postal() << "\n";
     }
     file.close();
-}
+}*/
 
 int main() {
     WSADATA wsaData;
@@ -77,6 +77,7 @@ int main() {
     cout << "Esperando conexiones..." << endl;
     int stsize = sizeof(struct sockaddr);
     while ((comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize)) != INVALID_SOCKET) {
+        cargarDatos(); // Cargar datos antes de aceptar la conexión
 
         cout << "Conexion aceptada." << endl;
         cout << "Conexion desde: " << inet_ntoa(client.sin_addr) << " (" << ntohs(client.sin_port) << ")" << endl;
@@ -137,31 +138,49 @@ int main() {
                     respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
                 }
             } else if (comando == "REALIZAR_PEDIDO") {
-                string id_usuario_str, direccion, codigo_postal_str, productos_str;
-                getline(ss, id_usuario_str, ';');
-                getline(ss, direccion, ';');
-                getline(ss, codigo_postal_str, ';');
-                getline(ss, productos_str, ';');
+                try {
+                    string id_pedido_str, fecha_str, estado, id_usuario_str, productos_str, direccion, codigo_postal_str;
+                    getline(ss, id_pedido_str, ';');
+                    getline(ss, fecha_str, ';');
+                    getline(ss, estado, ';');
+                    getline(ss, id_usuario_str, ';');
+                    getline(ss, productos_str, ';');
+                    getline(ss, direccion, ';');
+                    getline(ss, codigo_postal_str, ';');
 
-                int id_usuario = stoi(id_usuario_str);
-                int codigo_postal = stoi(codigo_postal_str);
-                map<int, int> productos;
-                stringstream ssProductos(productos_str);
-                string item;
-                while (getline(ssProductos, item, ',')) {
-                    size_t pos = item.find(':');
-                    if (pos != string::npos) {
-                        int id_prod = stoi(item.substr(0, pos));
-                        int cantidad = stoi(item.substr(pos + 1));
-                        productos[id_prod] = cantidad;
+                    int id_pedido = stoi(id_pedido_str);
+                    int id_usuario = stoi(id_usuario_str);
+                    int codigo_postal = stoi(codigo_postal_str);
+
+                    // Parsear productos
+                    map<int, int> productos;
+                    if (!productos_str.empty()) {
+                        stringstream ssProductos(productos_str);
+                        string item;
+                        while (getline(ssProductos, item, ',')) {
+                            size_t pos = item.find(':');
+                            if (pos != string::npos) {
+                                int id_prod = stoi(item.substr(0, pos));
+                                int cantidad = stoi(item.substr(pos + 1));
+                                productos[id_prod] = cantidad;
+                            }
+                        }
                     }
+
+                    // Parsea la fecha (YYYY-MM-DD)
+                    int anyo, mes, dia;
+                    char sep1, sep2;
+                    istringstream is(fecha_str);
+                    is >> anyo >> sep1 >> mes >> sep2 >> dia;
+                    Fecha fecha_pedido{dia, mes, anyo};
+
+                    Pedido nuevoPedido(id_pedido, fecha_pedido, estado, id_usuario, productos, direccion, codigo_postal);
+                    pedidos.push_back(nuevoPedido);
+                    guardarPedidosCsv(pedidos);
+                    respuestaServidor = "OK;Pedido registrado";
+                } catch (const exception& e) {
+                    respuestaServidor = string("ERROR;Formato de pedido incorrecto: ") + e.what();
                 }
-                int id_pedido = pedidos.size() + 1;
-                Fecha fecha_actual;
-                Pedido nuevoPedido(id_pedido, fecha_actual, "Pendiente", id_usuario, productos, direccion, codigo_postal);
-                pedidos.push_back(nuevoPedido);
-                guardarPedidosCsv(pedidos);
-                respuestaServidor = "OK;Pedido registrado";
             } else {
                 respuestaServidor = "ERROR;Comando no reconocido";
             }
