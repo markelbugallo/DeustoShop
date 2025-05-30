@@ -1,0 +1,16 @@
+[CLIENTE] [2025-05-30 16:56:02] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 16:56:17] DEBUG: Respuesta del servidor: OK;2506;la;12;as;4;asa;3333
+[CLIENTE] [2025-05-30 16:56:17] Perfil actualizado correctamente para usuario: la
+[CLIENTE] [2025-05-30 16:56:36] Cerrando sesion de usuario: la
+[CLIENTE] [2025-05-30 16:56:38] Cerrando el programa...
+[CLIENTE] [2025-05-30 16:59:05] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 16:59:24] Cerrando sesion de usuario: la
+[CLIENTE] [2025-05-30 16:59:30] Cerrando el programa...
+[CLIENTE] [2025-05-30 17:01:38] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 17:01:47] Cerrando sesion de usuario: la
+[CLIENTE] [2025-05-30 17:01:51] Cerrando el programa...
+[CLIENTE] [2025-05-30 17:04:04] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 17:06:30] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 17:12:47] Inicio de sesion correcto (servidor) para usuario: la
+[CLIENTE] [2025-05-30 17:12:59] Cerrando sesion de usuario: la
+[CLIENTE] [2025-05-30 17:13:01] Cerrando el programa...

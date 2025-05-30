@@ -14,12 +14,33 @@
 #include <set>
 #include <algorithm>
 #include <iomanip> // Asegúrate de tener este include arriba
+#include <fstream> // Añadido para el logging
+#include <ctime> // Añadido para la función log
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
 // Definición del miembro estático para la conexión persistente
 ConexionServidor MenusCliente::conexionSesion;
+
+// Declaración y definición de la función log al principio del archivo
+void log(const std::string& mensaje) {
+    std::ofstream logFile("../Log/log.txt", std::ios::app);
+    if (!logFile) {
+        // Si falla, prueba con la ruta desde DeustoShopCpp
+        logFile.open("Log/log.txt", std::ios::app);
+    }
+    if (!logFile) {
+        std::cerr << "No se pudo abrir el archivo de log en ninguna ruta." << std::endl;
+        return;
+    }
+    time_t now = time(nullptr);
+    tm* ltm = localtime(&now);
+    char fechaHora[32];
+    strftime(fechaHora, sizeof(fechaHora), "%Y-%m-%d %H:%M:%S", ltm);
+    logFile << "[CLIENTE] [" << fechaHora << "] " << mensaje << std::endl;
+}
+
 
 
 int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
@@ -28,9 +49,13 @@ int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
     } else {
         // Fallback: conexión temporal (por si acaso)
         ConexionServidor temp;
-        if (!temp.conectar()) return 1;
+        if (!temp.conectar()) {
+            log("Error: No se pudo conectar al servidor (mandarAlServidor)");
+            return 1;
+        }
         bool ok = temp.enviar(mensaje, respuesta);
         temp.cerrar();
+        if (!ok) log("Error: Fallo al enviar mensaje al servidor (mandarAlServidor)");
         return ok ? 0 : 1;
     }
 }
@@ -56,18 +81,11 @@ void MenusCliente::mostrarMenuInicial() {
             false;
         } else if (opcion == 2)
         {
-            /*cout << "\n\nProbando server...\n\n";
-            string respuesta;
-            if (mandarAlServidor("INICIAR SESION", respuesta) == 0)
-            {
-                
-            }*/
-
             usuario_actual = mostrarMenuInicioSesion();
             false;
-
         } else if (opcion == 3)
         {
+            log("Cerrando el programa...");
             cout << "\nCerrando el programa...\n";
             exit(0);
             break;
@@ -116,6 +134,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setId_subscripcion(id_subscripcion);
     codigo_postal = pedirEntero("Codigo Postal: ");
     if (codigo_postal == -1) {
+        log("Registro cancelado: Codigo postal no valido");
         cout << "Volviendo al menu anterior..." << endl;
         return Usuario(); 
     }
@@ -123,6 +142,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     nuevoUsuario.setId_usuario(usuarios.size() + 1);
     ConexionServidor conexion;
     if (!conexion.conectar()) {
+        log("Error: No se pudo conectar al servidor (registro)");
         cout << "No se pudo conectar al servidor." << endl;
         return Usuario();
     }
@@ -152,14 +172,17 @@ Usuario MenusCliente::mostrarMenuRegistro() {
         }
         usuarios.push_back(nuevoUsuario);
         guardarUsuariosCsv(usuarios);
+        log("Usuario registrado correctamente: " + nuevoUsuario.getNombre_usuario());
         cout << "Usuario registrado correctamente.\n";
         conexion.cerrar();
         return nuevoUsuario;
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
+        log("Error del servidor al registrar usuario: " + respuesta.substr(6));
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
         mostrarMenuInicial();
         return Usuario();
     } else {
+        log("Error al registrar usuario en el servidor");
         cout << "Error al registrar usuario en el servidor.\n";
         conexion.cerrar();
         return Usuario();
@@ -177,6 +200,7 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
 
         ConexionServidor conexion;
         if (!conexion.conectar()) {
+            log("Error: No se pudo conectar al servidor (inicio de sesion)");
             cout << "No se pudo conectar al servidor." << endl;
             return usuario_actual;
         }
@@ -211,21 +235,26 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                     }
                     guardarUsuariosCsv(usuarios);
                 }
+                log("Inicio de sesion correcto (servidor) para usuario: " + nombre);
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
                 conexion.cerrar(); // CIERRA LA CONEXIÓN AQUÍ
                 break;
             } else if (respuesta == "EXITO") {
+                log("Inicio de sesion correcto (servidor) para usuario: " + nombre);
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
                 conexion.cerrar();
                 break;
             } else if (respuesta.rfind("ERROR;", 0) == 0) {
+                log("Error del servidor al iniciar sesion: " + respuesta.substr(6));
                 cout << "Error del servidor: " << respuesta.substr(6) << endl;
                 conexion.cerrar();
             } else {
+                log("Respuesta inesperada del servidor al iniciar sesion: " + respuesta);
                 cout << "Respuesta inesperada del servidor: " << respuesta << endl;
                 conexion.cerrar();
             }
         } else {
+            log("Error de conexion con el servidor al iniciar sesion");
             cout << "Error de conexion con el servidor." << endl;
             conexion.cerrar();
             mostrarMenuInicial();
@@ -258,6 +287,7 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     } else if (opcion == 4) {
         mostrarMenuMiPerfil(usuario_actual);
     } else if (opcion == 5) {
+        log("Cerrando sesion de usuario: " + usuario_actual.getNombre_usuario());
         cout << "\nCerrando sesion...\n\n";
         this->conexionSesion.cerrar();
         mostrarMenuInicial();
@@ -359,9 +389,11 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
                 respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
                 respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
 
+                log("DEBUG: Respuesta limpia: '" + respuesta + "'");
                 cout << "DEBUG: Respuesta limpia: '" << respuesta << "'" << endl;
 
                 if (respuesta.rfind("OK;", 0) == 0 || respuesta == "OK") {
+                    log("Pedido realizado correctamente para usuario: " + usuario_actual.getNombre_usuario());
                     cout << "¡Pedido realizado correctamente!\n";
                     Pedido nuevoPedido(
                         nuevo_id_pedido,
@@ -378,11 +410,13 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
                     mostrarMenuPrincipal(usuario_actual);
                     break;
                 } else {
+                    log("Error al realizar el pedido: " + respuesta);
                     cout << "Error al realizar el pedido: " << respuesta << endl;
                     mostrarMenuPrincipal(usuario_actual);
                     break;
                 }
             } else {
+                log("Error de conexion con el servidor al realizar el pedido");
                 cout << "Error de conexion con el servidor al realizar el pedido." << endl;
                 mostrarMenuPrincipal(usuario_actual);
                 break;
@@ -629,7 +663,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
 
-        // DEBUG: imprime la respuesta real del servidor
+        log("DEBUG: Respuesta del servidor: " + respuesta);
         cout << "DEBUG: Respuesta del servidor: " << respuesta << endl;
 
         if (respuesta.rfind("OK;", 0) == 0) {
@@ -655,19 +689,22 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
                 }
             }
             guardarUsuariosCsv(usuarios);
+            log("Perfil actualizado correctamente para usuario: " + usuario_actual.getNombre_usuario());
             cout << "Perfil actualizado correctamente (servidor y local).\n";
         } else if (respuesta.rfind("ERROR;", 0) == 0) {
+            log("Error del servidor al actualizar perfil: " + respuesta.substr(6));
             cout << "Error del servidor: " << respuesta.substr(6) << endl;
         } else {
+            log("Error al actualizar el perfil en el servidor. Cambios NO guardados localmente.");
             cout << "Error al actualizar el perfil en el servidor. Cambios NO guardados localmente.\n";
         }
     } else {
+        log("Error de conexion con el servidor al editar perfil");
         cout << "Error de conexion con el servidor.\n";
     }
 }
 
 void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
-
     stringstream mensaje;
     mensaje << "ELIMINAR_USUARIO;" << usuario_actual.getId_usuario();
     string respuesta;
@@ -675,6 +712,7 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
         if (respuesta == "OK" || respuesta == "OK;") {
+            log("Perfil eliminado correctamente para usuario: " + usuario_actual.getNombre_usuario());
             // Elimina localmente del vector usuarios
         /*    usuarios.erase(
                 remove_if(usuarios.begin(), usuarios.end(),
@@ -692,11 +730,14 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
             mostrarMenuInicial();
             return;
         } else if (respuesta.rfind("ERROR;", 0) == 0) {
+            log("Error del servidor al eliminar perfil: " + respuesta.substr(6));
             cout << "Error del servidor: " << respuesta.substr(6) << endl;
         } else {
+            log("Error al eliminar el perfil en el servidor. Respuesta: " + respuesta);
             cout << "Error al eliminar el perfil en el servidor. Respuesta: " << respuesta << endl;
         }
     } else {
+        log("Error de conexion con el servidor al eliminar perfil");
         cout << "Error de conexion con el servidor.\n";
     }
     // Si llega aquí, no se eliminó correctamente, vuelve al menú de perfil

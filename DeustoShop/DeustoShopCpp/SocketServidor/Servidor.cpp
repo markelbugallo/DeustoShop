@@ -8,6 +8,7 @@
 #include <winsock2.h>
 #include <fstream>
 #include <algorithm>
+#include <ctime>
 #include "../../DeustoShopCpp/Clases/Usuario.h"
 #include "../../DeustoShopCpp/Clases/Pedido.h"
 #include "../../DeustoShopCpp/BD/Bd.h"
@@ -17,11 +18,22 @@
 
 using namespace std;
 
-ofstream logFile("log.txt");
-
-void log(const std::string &message) {
-    cout << message << endl;
-    logFile << message << endl;
+// Declaración y definición de la función log al principio del archivo
+void log(const std::string& mensaje) {
+    std::ofstream logFile("../Log/log.txt", std::ios::app);
+    if (!logFile) {
+        // Si falla, prueba con la ruta desde DeustoShopCpp
+        logFile.open("Log/log.txt", std::ios::app);
+    }
+    if (!logFile) {
+        std::cerr << "No se pudo abrir el archivo de log en ninguna ruta." << std::endl;
+        return;
+    }
+    time_t now = time(nullptr);
+    tm* ltm = localtime(&now);
+    char fechaHora[32];
+    strftime(fechaHora, sizeof(fechaHora), "%Y-%m-%d %H:%M:%S", ltm);
+    logFile << "[SERVIDOR] [" << fechaHora << "] " << mensaje << std::endl;
 }
 
 /*void guardarPedidosCsv(const vector<Pedido>& pedidos) {
@@ -48,51 +60,50 @@ int main() {
     struct sockaddr_in server, client;
     char sendBuff[512], recvBuff[512];
 
-    cout << "Inicializando Winsock..." << endl;
+    log("Inicializando Winsock...");
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
         log("Fallo en el WSAStartup: " + to_string(WSAGetLastError()));
         return 1;
     }
-    cout << "Inicializado." << endl;
+    log("Inicializado.");
 
     if ((conn_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-        cout << "No se pudo crear el socket: " << to_string(WSAGetLastError()) << endl;
+        log("No se pudo crear el socket: " + to_string(WSAGetLastError()));
         WSACleanup();
         return 1;
     }
-    cout << "Socket creado." << endl;
+    log("Socket creado.");
 
     server.sin_addr.s_addr = inet_addr(SERVER_IP);
     server.sin_family = AF_INET;
     server.sin_port = htons(SERVER_PORT);
 
     if (bind(conn_socket, (struct sockaddr*) &server, sizeof(server)) == SOCKET_ERROR) {
-        cout << "Bind ha fallado con el codigo de error: " <<  to_string(WSAGetLastError()) << endl;
+        log("Bind ha fallado con el codigo de error: " +  to_string(WSAGetLastError()));
         closesocket(conn_socket);
         WSACleanup();
         return 1;
     }
-    cout << "Bind hecho." << endl;
+    log("Bind hecho.");
 
     if (listen(conn_socket, 5) == SOCKET_ERROR) {
-        cout << "Listen fallo: " << to_string(WSAGetLastError()) << endl;
+        log("Listen fallo: " + to_string(WSAGetLastError()));
         closesocket(conn_socket);
         WSACleanup();
         return 1;
     }
 
-    cout << "Esperando conexiones..." << endl;
+    log("Esperando conexiones...");
     int stsize = sizeof(struct sockaddr);
     while ((comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize)) != INVALID_SOCKET) {
         cargarDatos(); // Cargar datos antes de aceptar la conexión
 
-        cout << "Conexion aceptada." << endl;
-        cout << "Conexion desde: " << inet_ntoa(client.sin_addr) << " (" << ntohs(client.sin_port) << ")" << endl;
-        cout << "Esperando mensajes..." << endl;
+        log(std::string("Conexion aceptada desde: ") + inet_ntoa(client.sin_addr) + " (" + to_string(ntohs(client.sin_port)) + ")");
+        log("Esperando mensajes...");
 
         int bytes = recv(comm_socket, recvBuff, sizeof(recvBuff), 0);
         if (bytes == SOCKET_ERROR) {
-            cout << "Error al recibir: " << to_string(WSAGetLastError()) << endl;
+            log("Error al recibir: " + to_string(WSAGetLastError()));
         } else {
             recvBuff[bytes] = '\0';
             string respuestaServidor = "";
@@ -119,8 +130,10 @@ int main() {
                         }
                     }
                     respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_sub + ";" + direccion + ";" + cp;
+                    log("Intento de login de usuario: " + nombre + " - EXITO");
                 } else {
                     respuestaServidor = "ERROR;Usuario no encontrado o contrasena incorrecta";
+                    log("Intento de login de usuario: " + nombre + " - FALLO");
                 }
             } else if (comando == "REGISTRAR_USUARIO") {
                 cargarDatos();
@@ -276,12 +289,12 @@ int main() {
             }
 
             send(comm_socket, respuestaServidor.c_str(), respuestaServidor.size(), 0);
-            cout << "Respuesta enviada: " << respuestaServidor << endl;
+            log("Respuesta enviada: " + respuestaServidor);
             closesocket(comm_socket);
         }
 
         if (comm_socket == INVALID_SOCKET) {
-            cout << "Accept fallo: " << to_string(WSAGetLastError()) << endl;
+            log("Accept fallo: " + to_string(WSAGetLastError()));
             closesocket(conn_socket);
             WSACleanup();
             return 1;
