@@ -1,6 +1,9 @@
 #include "Pedido.h"
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <map>
+#include <vector>
 using namespace std;
 #include "Usuario.h"
 #include "../SocketCliente/MenusCliente.h"

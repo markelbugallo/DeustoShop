@@ -39,8 +39,9 @@ public:
     double obtenerPrecioProducto(int id_producto);
     void mostrarMenuCesta(Usuario& usuario_actual);
     void mostrarMenuProductos(Usuario usuario_actual);
-    void mostrarTodosLosProductos(Usuario usuario_actual);
-    void mostrarProductosPorCategoria(Usuario usuario_actual);
+    void mostrarTodosLosProductos(Usuario& usuario_actual);
+    void mostrarProductosPorCategoria(Usuario& usuario_actual);
+    void realizarPedido(Usuario& usuario_actual);
     void mostrarHistorialCompras(Usuario usuario_actual);
     void mostrarAlmacenes(Usuario usuario_actual);
     void editarPerfil(Usuario& usuario_actual);

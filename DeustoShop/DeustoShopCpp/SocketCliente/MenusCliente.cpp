@@ -1,8 +1,11 @@
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <map>
+#include <vector>
 #include <conio.h>
 #include <stdio.h>
 #include <winsock2.h>
-#include <sstream>
 #include "MenusCliente.h"
 #include "../Clases/Usuario.h"
 #include "../BD/Bd.h"
@@ -10,6 +13,7 @@
 #include "../Clases/Utils.h"
 #include <set>
 #include <algorithm>
+#include <iomanip> // Asegúrate de tener este include arriba
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
@@ -231,39 +235,27 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     int opcion = 0;
 
     cout << "\nMENU PRINCIPAL\n";
-    cout << "1) Catalogo de productos\n";
+    cout << "1) Realizar pedido\n";
     cout << "2) Historial de compras\n";
     cout << "3) Mostrar almacenes\n";
     cout << "4) Mi perfil\n";
     cout << "5) Salir\n";
-    cout << "6) Realizar pedido\n";
-    cout << "7) Ver cesta\n";
     opcion = pedirEntero("Elija una opcion: ");
     if (opcion == -1) return;
 
-    if (opcion == 1)
-    {
+    if (opcion == 1) {
         mostrarMenuProductos(usuario_actual);
-    } else if (opcion == 2)
-    {
+    } else if (opcion == 2) {
         mostrarHistorialCompras(usuario_actual);
-    } else if (opcion == 3)
-    {
+    } else if (opcion == 3) {
         mostrarAlmacenes(usuario_actual);
-    } else if (opcion == 4)
-    {
+    } else if (opcion == 4) {
         mostrarMenuMiPerfil(usuario_actual);
-    } else if (opcion == 5)
-    {
+    } else if (opcion == 5) {
         cout << "\nCerrando sesion...\n\n";
         this->conexionSesion.cerrar();
         mostrarMenuInicial();
-    }else if( opcion == 6)
-    {
-    map<int, int> productosPedido = Pedido::realizarPedidoInteractivo(usuario_actual); 
-      } else if (opcion == 7) {
-        mostrarMenuCesta(usuario_actual);
-    } 
+    }
 }
 
 /*void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
@@ -287,12 +279,14 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     }
 }*/
 double MenusCliente::obtenerPrecioProducto(int id_producto) {
-    for (Producto prod : productos) { 
+    double precio = 0.0;
+    for (const Producto& prod : productos) { // Usa el vector correcto
         if (prod.getId_producto() == id_producto) {
-            return prod.getPrecio();
+            precio = prod.getPrecio();
+            break; // Salimos del bucle una vez encontrado el producto
         }
     }
-    return 0.0;
+  return precio; ; 
 }
 
 void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
@@ -307,7 +301,8 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
                 int id = par.first;
                 int cantidad = par.second;
                 double precio = obtenerPrecioProducto(id);
-                cout << id << "\t" << cantidad << "\t\t" << precio * cantidad << "€\n";
+                cout << id << "\t" << cantidad << "\t\t"
+                     << fixed << setprecision(2) << precio * cantidad << " Euros" << endl;
             }
         }
         cout << "\n1) Borrar un producto\n";
@@ -325,19 +320,40 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
         } else if (opcion == 2) {
             cesta.clear();
         } else if (opcion == 3 && !cesta.empty()) {
-          
-            Pedido nuevoPedido(
-                0, 
-                Fecha(), 
-                "Pendiente", 
-                usuario_actual.getId_usuario(),
-                cesta,
-                usuario_actual.getDireccion(),
-                usuario_actual.getCodigo_postal()
-            );
-            usuario_actual.agregarPedido(nuevoPedido);
-            cesta.clear();
-            cout << "¡Pedido realizado!\n";
+            // Construir mensaje para el servidor
+            stringstream mensaje;
+            mensaje << "REALIZAR_PEDIDO;"
+                    << usuario_actual.getId_usuario() << ";"
+                    << usuario_actual.getDireccion() << ";"
+                    << usuario_actual.getCodigo_postal() << ";";
+            bool primero = true;
+            for (const auto& par : cesta) {
+                if (!primero) mensaje << ",";
+                mensaje << par.first << ":" << par.second;
+                primero = false;
+            }
+            string respuesta;
+            if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
+                cout << "¡Pedido realizado correctamente!\n";
+                // Si quieres, puedes crear el pedido localmente también:
+                Pedido nuevoPedido(
+                    0, 
+                    Fecha(), 
+                    "Pendiente", 
+                    usuario_actual.getId_usuario(),
+                    cesta,
+                    usuario_actual.getDireccion(),
+                    usuario_actual.getCodigo_postal()
+                );
+                usuario_actual.agregarPedido(nuevoPedido);
+                cesta.clear();
+                mostrarMenuPrincipal(usuario_actual);
+                break;
+            } else {
+                cout << "Error al realizar el pedido: " << respuesta << endl;
+                mostrarMenuPrincipal(usuario_actual);
+                break;
+            }
         } else if (opcion == 4) {
             mostrarMenuPrincipal(usuario_actual);
             break;
@@ -348,46 +364,78 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
 
 void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
     int opcion;
-    cout << endl << "MENU DE PRODUCTOS" << endl;
-    cout << "1) Mostrar todos los productos\n";
-    cout << "2) Mostrar productos de una categoria especifica\n";
-    cout << "3) Volver al menu principal\n\n";
-    opcion = pedirEntero("Elija una opcion: ");
-    if (opcion == -1) return;
+    do {
+        cout << endl << "MENU DE REALIZAR PEDIDO" << endl;
+        cout << "1) Mostrar todos los productos\n";
+        cout << "2) Mostrar productos de una categoria especifica\n";
+        cout << "3) Anadir producto a la cesta\n";
+        cout << "4) Ver cesta\n";
+        cout << "5) Volver al menu principal\n\n";
+        opcion = pedirEntero("Elija una opcion: ");
+        if (opcion == -1) return;
 
+        if (opcion == 1) {
+            mostrarTodosLosProductos(usuario_actual);
 
+        } else if (opcion == 2) {
+            mostrarProductosPorCategoria(usuario_actual);
+        } else if (opcion == 3) {
+            // Añadir producto a la cesta
+            int id_producto, cantidad;
+            cout << "Introduce el ID del producto: ";
+            cin >> id_producto;
+            cout << "Introduce la cantidad: ";
+            cin >> cantidad;
+            cesta[id_producto] += cantidad;
+            cout << "Producto anadido a la cesta.\n";
+        } else if (opcion == 4) {
+            mostrarMenuCesta(usuario_actual);
+        }
+    } while (opcion != 5);
 
-    if (opcion == 1)
-    {
-        mostrarTodosLosProductos(usuario_actual);
-    } else if (opcion == 2)
-    {
-        mostrarProductosPorCategoria(usuario_actual);
-    } else if (opcion == 3)
-    {
-        mostrarMenuPrincipal(usuario_actual);
-    }
+    mostrarMenuPrincipal(usuario_actual);
 }
 
-void MenusCliente::mostrarTodosLosProductos(Usuario usuario_actual) {
+void MenusCliente::mostrarTodosLosProductos(Usuario& usuario_actual) {
     int opcion;
+    string pregunta;
     cout << endl << "TODOS LOS PRODUCTOS" << endl;
 
     for (size_t i = 0; i < productos.size(); i++) {
         cout << productos[i].getId_producto() << "  |  " << productos[i].getNombre_producto() << "  |  " << productos[i].getPrecio() << " Euros" <<endl;
     }
+    cout <<("\nDesea realizar un pedido? (s/n): ")<< endl;
+    cin >> pregunta;
+    cout << endl;
+    if (pregunta == "s")
+    {
+        realizarPedido(usuario_actual);
+    } else if (pregunta == "n")
+    {
+        cout << "Volviendo al menu principal..." << endl;
+        mostrarMenuPrincipal(usuario_actual);
 
+    } else {
+        cout << "Opcion no valida, volviendo al menu principal..." << endl;
+        mostrarMenuPrincipal(usuario_actual);
+    }
+/*
     opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
+
     cout << endl;
 
     if (opcion == 1)
     {
         mostrarMenuPrincipal(usuario_actual);
     }
+        */
+
+
 }
 
-void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
+void MenusCliente::mostrarProductosPorCategoria(Usuario& usuario_actual) {
     int opcion;
+    string respuesta;
     string pregunta;
     string eleccion;
     set<string> categoriasDisponibles = {"JUGUETERIA", "HOGAR", "ROPA", "ELECTRONICA", "ALIMENTACION", "LIBRERIA", "DEPORTE", "OTROS"};
@@ -418,14 +466,29 @@ void MenusCliente::mostrarProductosPorCategoria(Usuario usuario_actual) {
             }
         }
     }
-
-    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
+     
+    cout <<("\nDesea realizar un pedido? (s/n): ")<< endl;
+    cin >> respuesta;
     cout << endl;
-
-    if (opcion == 1)
+    if (respuesta == "s")
     {
+        realizarPedido(usuario_actual);
+    } else if (respuesta == "n")
+    {
+        cout << "Volviendo al menu principal..." << endl;
+        mostrarMenuPrincipal(usuario_actual);
+    } else {
+        cout << "Opcion no valida, volviendo al menu principal..." << endl;
         mostrarMenuPrincipal(usuario_actual);
     }
+
+   // opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
+ // cout << endl;
+
+    // if (opcion == 1)
+    // {
+    //     mostrarMenuPrincipal(usuario_actual);
+    // }
 }
 
 void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
@@ -678,4 +741,63 @@ void ConexionServidor::cerrar() {
         WSACleanup();
         conectada = false;
     }
+}
+
+void MenusCliente::realizarPedido(Usuario& usuario_actual) {
+    int id_producto, cantidad;
+    char respuesta;
+    do {
+        cout << "Introduce el ID del producto: ";
+        cin >> id_producto;
+        cout << "Introduce la cantidad: ";
+        cin >> cantidad;
+        cesta[id_producto] += cantidad;
+        cout << "Quieres anadir otro producto? (s/n): ";
+        cin >> respuesta;
+    } while (respuesta == 's' || respuesta == 'S');
+    mostrarMenuCesta(usuario_actual);
+}
+
+string pedirCompra(const string& mensaje) {
+    string respuesta;
+    cout << mensaje;
+    cin >> respuesta;
+    if (respuesta == "S") respuesta = "s";
+    if (respuesta == "N") respuesta = "n";
+    return respuesta;
+}
+
+void procesarComando(const string& comando, const string& datos, string& respuestaServidor) {
+    stringstream ss(datos);
+    if (comando == "REGISTRAR_USUARIO") {
+        // ... (código existente para REGISTRAR_USUARIO)
+    } else if (comando == "LOGIN") {
+        // ... (código existente para LOGIN)
+    } else if (comando == "REALIZAR_PEDIDO") {
+        string id_usuario_str, direccion, codigo_postal_str, productos_str;
+        getline(ss, id_usuario_str, ';');
+        getline(ss, direccion, ';');
+        getline(ss, codigo_postal_str, ';');
+        getline(ss, productos_str, ';');
+        int id_usuario = stoi(id_usuario_str);
+        int codigo_postal = stoi(codigo_postal_str);
+        map<int, int> productos;
+        stringstream ssProductos(productos_str);
+        string item;
+        while (getline(ssProductos, item, ',')) {
+            size_t pos = item.find(':');
+            if (pos != string::npos) {
+                int id_prod = stoi(item.substr(0, pos));
+                int cantidad = stoi(item.substr(pos + 1));
+                productos[id_prod] = cantidad;
+            }
+        }
+        int id_pedido = pedidos.size() + 1;
+        Fecha fecha_actual; // Asegúrate de inicializar la fecha correctamente
+        Pedido nuevoPedido(id_pedido, fecha_actual, "Pendiente", id_usuario, productos, direccion, codigo_postal);
+        pedidos.push_back(nuevoPedido);
+        // guardarPedidosCsv(pedidos); // Si tienes persistencia
+        respuestaServidor = "OK;Pedido registrado";
+    }
+    // ... (otros comandos)
 }

@@ -22,6 +22,14 @@ struct Fecha
         }
         return f;
     }
+
+    std::string toString() const {
+        std::ostringstream oss;
+        oss << (dia < 10 ? "0" : "") << dia << "/"
+            << (mes < 10 ? "0" : "") << mes << "/"
+            << anyo;
+        return oss.str();
+    }
 };
 
 

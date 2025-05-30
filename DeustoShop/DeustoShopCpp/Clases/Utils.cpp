@@ -1,6 +1,11 @@
 #include "Utils.h"
 #include <iostream>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <map>
+#include <vector>
+
 using namespace std;
 
 int pedirEntero(const string& mensaje) {

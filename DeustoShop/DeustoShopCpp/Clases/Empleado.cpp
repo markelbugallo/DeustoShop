@@ -1,3 +1,8 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <map>
+#include <vector>
 #include "Empleado.h"
 
 Empleado::Empleado(

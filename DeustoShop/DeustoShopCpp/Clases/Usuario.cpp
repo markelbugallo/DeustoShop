@@ -1,11 +1,11 @@
 #include "Usuario.h"
 using namespace std;
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <map>
 #include <vector>
 #include <fstream>
-#include <iostream>
-#include <sstream>
 
 // constructor vacio
 Usuario::Usuario()

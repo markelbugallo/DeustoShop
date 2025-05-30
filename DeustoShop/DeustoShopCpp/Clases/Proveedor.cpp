@@ -1,6 +1,9 @@
 #include "Proveedor.h"
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <map>
+#include <vector>
 using namespace std;
 
 // constructor
