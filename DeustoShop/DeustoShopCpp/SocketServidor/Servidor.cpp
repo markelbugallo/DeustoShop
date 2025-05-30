@@ -17,6 +17,13 @@
 
 using namespace std;
 
+ofstream logFile("log.txt");
+
+void log(const std::string &message) {
+    cout << message << endl;
+    logFile << message << endl;
+}
+
 /*void guardarPedidosCsv(const vector<Pedido>& pedidos) {
     ofstream file("pedidos.csv");
     for (const Pedido& p : pedidos) {
@@ -43,7 +50,7 @@ int main() {
 
     cout << "Inicializando Winsock..." << endl;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
-        cout << "Fallo en el WSAStartup: " << to_string(WSAGetLastError()) << endl;
+        log("Fallo en el WSAStartup: " + to_string(WSAGetLastError()));
         return 1;
     }
     cout << "Inicializado." << endl;
