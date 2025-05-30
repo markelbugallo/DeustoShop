@@ -357,7 +357,7 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
 
                 if (respuesta.rfind("OK;", 0) == 0 || respuesta == "OK") {
                     log("Pedido realizado correctamente para usuario: " + usuario_actual.getNombre_usuario());
-                    cout << "¡Pedido realizado correctamente!\n";
+                    cout << "Pedido realizado correctamente!\n";
                     Pedido nuevoPedido(
                         nuevo_id_pedido,
                         Fecha{now->tm_mday, now->tm_mon + 1, now->tm_year + 1900},

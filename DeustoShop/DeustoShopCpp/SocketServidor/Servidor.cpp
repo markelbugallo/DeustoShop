@@ -132,7 +132,7 @@ int main() {
                 getline(ss, id_subscripcion_str, ';');
                 getline(ss, direccion, ';');
                 getline(ss, codigo_postal_str, ';');
-
+                
                 bool campos_ok = !id_usuario_str.empty() && !nombre.empty() && !contrasena.empty() && !contacto.empty() &&
                                  !id_subscripcion_str.empty() && !direccion.empty() && !codigo_postal_str.empty();
 
@@ -204,7 +204,6 @@ int main() {
                     getline(ss, direccion, ';');
                     getline(ss, codigo_postal_str, ';');
 
-             s
                     bool campos_ok = !id_pedido_str.empty() && !fecha_str.empty() && !estado.empty() &&
                                      !id_usuario_str.empty() && !productos_str.empty() &&
                                      !direccion.empty() && !codigo_postal_str.empty();
@@ -216,7 +215,6 @@ int main() {
                         int id_usuario = stoi(id_usuario_str);
                         int codigo_postal = stoi(codigo_postal_str);
 
-           
                         map<int, int> productos;
                         if (!productos_str.empty()) {
                             stringstream ssProductos(productos_str);
@@ -231,7 +229,6 @@ int main() {
                             }
                         }
 
-                       
                         int anyo, mes, dia;
                         char sep1, sep2;
                         istringstream is(fecha_str);

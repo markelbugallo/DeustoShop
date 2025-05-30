@@ -33,3 +33,17 @@
 [GENERAL] [2025-05-30 17:59:05] Esperando mensajes...
 [GENERAL] [2025-05-30 17:59:05] Respuesta enviada: OK;2507;a;a;a;4;a;1
 [GENERAL] [2025-05-30 17:59:05] Usuario registrado correctamente: a
+[GENERAL] [2025-05-30 18:40:18] Inicializando Winsock...
+[GENERAL] [2025-05-30 18:40:18] Inicializado.
+[GENERAL] [2025-05-30 18:40:18] Socket creado.
+[GENERAL] [2025-05-30 18:40:18] Bind hecho.
+[GENERAL] [2025-05-30 18:40:18] Esperando conexiones...
+[GENERAL] [2025-05-30 18:42:20] Conexion aceptada desde: 127.0.0.1 (51760)
+[GENERAL] [2025-05-30 18:42:20] Esperando mensajes...
+[GENERAL] [2025-05-30 18:42:21] Respuesta enviada: OK;2507;lander;12;lander.guirles@opendeusto.es;0;Jardiner de Gernika;48003
+[GENERAL] [2025-05-30 18:42:21] Usuario registrado correctamente: lander
+[GENERAL] [2025-05-30 18:47:07] Conexion aceptada desde: 127.0.0.1 (51802)
+[GENERAL] [2025-05-30 18:47:07] Esperando mensajes...
+[GENERAL] [2025-05-30 18:47:08] DEBUG: Respuesta limpia: 'OK;Pedido registrado'
+[GENERAL] [2025-05-30 18:47:08] Respuesta enviada: OK;Pedido registrado
+[GENERAL] [2025-05-30 18:47:08] Pedido realizado correctamente para usuario: lander
