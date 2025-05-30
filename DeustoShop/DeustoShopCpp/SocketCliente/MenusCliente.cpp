@@ -61,6 +61,7 @@ void MenusCliente::mostrarMenuInicial() {
 
             usuario_actual = mostrarMenuInicioSesion();
             false;
+
         } else if (opcion == 3)
         {
             cout << "\nCerrando el programa...\n";
@@ -152,9 +153,7 @@ Usuario MenusCliente::mostrarMenuRegistro() {
         return nuevoUsuario;
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
-        conexion.cerrar();
         mostrarMenuInicial();
-        cout << endl << endl;
         return Usuario();
     } else {
         cout << "Error al registrar usuario en el servidor.\n";
@@ -218,6 +217,8 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
             }
         } else {
             cout << "Error de conexion con el servidor." << endl;
+            mostrarMenuInicial();
+            break;
         }
     }
     // Guardar la conexión persistente para la sesión
@@ -579,7 +580,7 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
         if (respuesta == "OK" || respuesta == "OK;") {
             // Elimina localmente del vector usuarios
-            usuarios.erase(
+        /*    usuarios.erase(
                 remove_if(usuarios.begin(), usuarios.end(),
                     [&](const Usuario& u) { return u.getId_usuario() == usuario_actual.getId_usuario(); }),
                 usuarios.end()
@@ -591,7 +592,7 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
             cout << "Perfil eliminado correctamente.\n";
             // Cierra la conexión de la sesión
             this->conexionSesion.cerrar();
-            // Volver al menú inicial tras eliminar
+            // Volver al menú inicial tras eliminar*/
             mostrarMenuInicial();
             return;
         } else if (respuesta.rfind("ERROR;", 0) == 0) {

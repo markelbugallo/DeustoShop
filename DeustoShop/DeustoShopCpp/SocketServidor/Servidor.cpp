@@ -110,6 +110,7 @@ int main() {
                 } else {
                     cout << "Usuario no registrado" << endl;
                     respuestaServidor = "ERROR;Usuario no encontrado o contrasena incorrecta";
+                    
                 }
                 
 
@@ -184,7 +185,7 @@ int main() {
                 // Formato esperado: ELIMINAR_USUARIO;id
                 string id;
                 getline(ss, id, ';');
-                vector<Usuario> usuarios = cargarUsuariosCSV("../../DeustoShopC/data/usuarios.csv");
+                //vector<Usuario> usuarios = cargarUsuariosCSV("../../DeustoShopC/data/usuarios.csv");
                 size_t oldSize = usuarios.size();
                 usuarios.erase(
                     remove_if(usuarios.begin(), usuarios.end(), [&](const Usuario& u) {
@@ -194,6 +195,7 @@ int main() {
                 );
                 if (usuarios.size() == oldSize) {
                     respuestaServidor = "ERROR;Usuario no encontrado";
+
                 } else {
                     guardarUsuariosCsv(usuarios);
                     respuestaServidor = "OK";
