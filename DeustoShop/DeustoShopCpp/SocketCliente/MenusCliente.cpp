@@ -169,16 +169,18 @@ Usuario MenusCliente::mostrarMenuRegistro() {
 Usuario MenusCliente::mostrarMenuInicioSesion() {
     Usuario usuario_actual;
     string nombre, contra;
-    ConexionServidor conexion;
-    if (!conexion.conectar()) {
-        cout << "No se pudo conectar al servidor." << endl;
-        return usuario_actual;
-    }
     while (true) {
         cout << "\n\nNombre de usuario: ";
         cin >> nombre;
         cout << endl << "Contrasena: ";
         cin >> contra;
+
+        ConexionServidor conexion;
+        if (!conexion.conectar()) {
+            cout << "No se pudo conectar al servidor." << endl;
+            return usuario_actual;
+        }
+
         stringstream mensaje;
         mensaje << "LOGIN;" << nombre << ";" << contra;
         string respuesta;
@@ -210,23 +212,27 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                     guardarUsuariosCsv(usuarios);
                 }
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
+                conexion.cerrar(); // CIERRA LA CONEXIÓN AQUÍ
                 break;
             } else if (respuesta == "EXITO") {
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
+                conexion.cerrar();
                 break;
             } else if (respuesta.rfind("ERROR;", 0) == 0) {
                 cout << "Error del servidor: " << respuesta.substr(6) << endl;
+                conexion.cerrar();
             } else {
                 cout << "Respuesta inesperada del servidor: " << respuesta << endl;
+                conexion.cerrar();
             }
         } else {
             cout << "Error de conexion con el servidor." << endl;
+            conexion.cerrar();
             mostrarMenuInicial();
             break;
         }
     }
-    // Guardar la conexión persistente para la sesión
-    this->conexionSesion = conexion;
+    // NO guardes la conexión como miembro de la clase
     return usuario_actual;
 }
 
@@ -324,15 +330,16 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
             time_t t = time(nullptr);
             tm* now = localtime(&t);
             char fechaStr[11];
-            strftime(fechaStr, sizeof(fechaStr), "%Y-%m-%d", now);
+            strftime(fechaStr, sizeof(fechaStr), "%Y-%m-%d", now); // <-- FORMATO CORRECTO
 
             // Calcular el nuevo id de pedido
             int nuevo_id_pedido = pedidos.size() + 1;
 
             // Construir mensaje en formato CSV
             stringstream mensaje;
-            mensaje << nuevo_id_pedido << ";"
-                    << fechaStr << ";"
+            mensaje << "REALIZAR_PEDIDO;"
+                    << nuevo_id_pedido << ";"
+                    << fechaStr << ";" // <-- FECHA EN FORMATO CORRECTO
                     << "procesando solicitud" << ";"
                     << usuario_actual.getId_usuario() << ";";
 
@@ -347,24 +354,36 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
                     << usuario_actual.getCodigo_postal();
 
             string respuesta;
-            if (mandarAlServidor(mensaje.str(), respuesta) == 0 && respuesta.rfind("OK;", 0) == 0) {
-                cout << "¡Pedido realizado correctamente!\n";
-                Pedido nuevoPedido(
-                    nuevo_id_pedido,
-                    Fecha{now->tm_mday, now->tm_mon + 1, now->tm_year + 1900},
-                    "procesando solicitud",
-                    usuario_actual.getId_usuario(),
-                    cesta,
-                    usuario_actual.getDireccion(),
-                    usuario_actual.getCodigo_postal()
-                );
-                usuario_actual.agregarPedido(nuevoPedido);
-                pedidos.push_back(nuevoPedido);
-                cesta.clear();
-                mostrarMenuPrincipal(usuario_actual);
-                break;
+            if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
+                // Limpiar caracteres de control de la respuesta
+                respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
+                respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
+
+                cout << "DEBUG: Respuesta limpia: '" << respuesta << "'" << endl;
+
+                if (respuesta.rfind("OK;", 0) == 0 || respuesta == "OK") {
+                    cout << "¡Pedido realizado correctamente!\n";
+                    Pedido nuevoPedido(
+                        nuevo_id_pedido,
+                        Fecha{now->tm_mday, now->tm_mon + 1, now->tm_year + 1900},
+                        "procesando solicitud",
+                        usuario_actual.getId_usuario(),
+                        cesta,
+                        usuario_actual.getDireccion(),
+                        usuario_actual.getCodigo_postal()
+                    );
+                    usuario_actual.agregarPedido(nuevoPedido);
+                    pedidos.push_back(nuevoPedido);
+                    cesta.clear();
+                    mostrarMenuPrincipal(usuario_actual);
+                    break;
+                } else {
+                    cout << "Error al realizar el pedido: " << respuesta << endl;
+                    mostrarMenuPrincipal(usuario_actual);
+                    break;
+                }
             } else {
-                cout << "Error al realizar el pedido: " << respuesta << endl;
+                cout << "Error de conexion con el servidor al realizar el pedido." << endl;
                 mostrarMenuPrincipal(usuario_actual);
                 break;
             }

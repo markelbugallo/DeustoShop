@@ -137,7 +137,78 @@ int main() {
                     guardarUsuariosCsv(usuarios);
                     respuestaServidor = "OK;" + id + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion + ";" + direccion + ";" + codigo_postal;
                 }
+            } else if (comando == "EDITAR_USUARIO") {
+                cargarDatos();
+                string id_usuario_str, nombre, contrasena, contacto, id_subscripcion_str, direccion, codigo_postal_str;
+                getline(ss, id_usuario_str, ';');
+                getline(ss, nombre, ';');
+                getline(ss, contrasena, ';');
+                getline(ss, contacto, ';');
+                getline(ss, id_subscripcion_str, ';');
+                getline(ss, direccion, ';');
+                getline(ss, codigo_postal_str, ';');
+
+                bool campos_ok = !id_usuario_str.empty() && !nombre.empty() && !contrasena.empty() && !contacto.empty() &&
+                                 !id_subscripcion_str.empty() && !direccion.empty() && !codigo_postal_str.empty();
+
+                if (!campos_ok) {
+                    respuestaServidor = "ERROR;Campos incompletos";
+                } else {
+                    try {
+                        int id_usuario = stoi(id_usuario_str);
+                        int id_subscripcion = stoi(id_subscripcion_str);
+                        int codigo_postal = stoi(codigo_postal_str);
+
+                        bool encontrado = false;
+                        for (auto& u : usuarios) {
+                            if (u.getId_usuario() == id_usuario) {
+                                u.setNombre_usuario(nombre);
+                                u.setContrasena_usuario(contrasena);
+                                u.setContacto_usuario(contacto);
+                                u.setId_subscripcion(id_subscripcion);
+                                u.setDireccion(direccion);
+                                u.setCodigo_postal(codigo_postal);
+                                encontrado = true;
+                                break;
+                            }
+                        }
+
+                        if (encontrado) {
+                            guardarUsuariosCsv(usuarios);
+                            respuestaServidor = "OK;" + id_usuario_str + ";" + nombre + ";" + contrasena + ";" + contacto + ";" + id_subscripcion_str + ";" + direccion + ";" + codigo_postal_str;
+                        } else {
+                            respuestaServidor = "ERROR;Usuario no encontrado";
+                        }
+                    } catch (const exception& e) {
+                        respuestaServidor = string("ERROR;Formato incorrecto: ") + e.what();
+                    }
+                }
+            } else if (comando == "ELIMINAR_USUARIO") {
+                cargarDatos();
+                string id_usuario_str;
+                getline(ss, id_usuario_str, ';');
+
+                if (id_usuario_str.empty()) {
+                    respuestaServidor = "ERROR;ID de usuario vacio";
+                } else {
+                    try {
+                        int id_usuario = stoi(id_usuario_str);
+                        auto it = remove_if(usuarios.begin(), usuarios.end(),
+                            [id_usuario](const Usuario& u) { return u.getId_usuario() == id_usuario; });
+
+                        if (it != usuarios.end()) {
+                            usuarios.erase(it, usuarios.end());
+                            guardarUsuariosCsv(usuarios);
+                            respuestaServidor = "OK";
+                        } else {
+                            respuestaServidor = "ERROR;Usuario no encontrado";
+                        }
+                    } catch (const exception& e) {
+                        respuestaServidor = string("ERROR;Formato incorrecto: ") + e.what();
+                    }
+                }
             } else if (comando == "REALIZAR_PEDIDO") {
+                cargarDatos();
                 try {
                     string id_pedido_str, fecha_str, estado, id_usuario_str, productos_str, direccion, codigo_postal_str;
                     getline(ss, id_pedido_str, ';');
@@ -148,37 +219,49 @@ int main() {
                     getline(ss, direccion, ';');
                     getline(ss, codigo_postal_str, ';');
 
-                    int id_pedido = stoi(id_pedido_str);
-                    int id_usuario = stoi(id_usuario_str);
-                    int codigo_postal = stoi(codigo_postal_str);
+                    // Validación de campos
+                    bool campos_ok = !id_pedido_str.empty() && !fecha_str.empty() && !estado.empty() &&
+                                     !id_usuario_str.empty() && !productos_str.empty() &&
+                                     !direccion.empty() && !codigo_postal_str.empty();
 
-                    // Parsear productos
-                    map<int, int> productos;
-                    if (!productos_str.empty()) {
-                        stringstream ssProductos(productos_str);
-                        string item;
-                        while (getline(ssProductos, item, ',')) {
-                            size_t pos = item.find(':');
-                            if (pos != string::npos) {
-                                int id_prod = stoi(item.substr(0, pos));
-                                int cantidad = stoi(item.substr(pos + 1));
-                                productos[id_prod] = cantidad;
+                    if (!campos_ok) {
+                        respuestaServidor = "ERROR;Campos incompletos";
+                    } else {
+                        int id_pedido = stoi(id_pedido_str);
+                        int id_usuario = stoi(id_usuario_str);
+                        int codigo_postal = stoi(codigo_postal_str);
+
+                        // Parsear productos
+                        map<int, int> productos;
+                        if (!productos_str.empty()) {
+                            stringstream ssProductos(productos_str);
+                            string item;
+                            while (getline(ssProductos, item, ',')) {
+                                size_t pos = item.find(':');
+                                if (pos != string::npos) {
+                                    int id_prod = stoi(item.substr(0, pos));
+                                    int cantidad = stoi(item.substr(pos + 1));
+                                    productos[id_prod] = cantidad;
+                                }
                             }
                         }
+
+                        // Parsea la fecha (YYYY-MM-DD)
+                        int anyo, mes, dia;
+                        char sep1, sep2;
+                        istringstream is(fecha_str);
+                        is >> anyo >> sep1 >> mes >> sep2 >> dia;
+                        if (is.fail()) throw runtime_error("Fecha mal formada");
+
+                        Fecha fecha_pedido{dia, mes, anyo};
+
+                        Pedido nuevoPedido(id_pedido, fecha_pedido, estado, id_usuario, productos, direccion, codigo_postal);
+                        pedidos.push_back(nuevoPedido);
+                        guardarPedidosCsv(pedidos);
+                        respuestaServidor = "OK;Pedido registrado";
                     }
-
-                    // Parsea la fecha (YYYY-MM-DD)
-                    int anyo, mes, dia;
-                    char sep1, sep2;
-                    istringstream is(fecha_str);
-                    is >> anyo >> sep1 >> mes >> sep2 >> dia;
-                    Fecha fecha_pedido{dia, mes, anyo};
-
-                    Pedido nuevoPedido(id_pedido, fecha_pedido, estado, id_usuario, productos, direccion, codigo_postal);
-                    pedidos.push_back(nuevoPedido);
-                    guardarPedidosCsv(pedidos);
-                    respuestaServidor = "OK;Pedido registrado";
                 } catch (const exception& e) {
+                    cerr << "Excepcion en REALIZAR_PEDIDO: " << e.what() << endl;
                     respuestaServidor = string("ERROR;Formato de pedido incorrecto: ") + e.what();
                 }
             } else {
