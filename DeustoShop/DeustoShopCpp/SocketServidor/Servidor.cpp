@@ -12,29 +12,13 @@
 #include "../../DeustoShopCpp/Clases/Usuario.h"
 #include "../../DeustoShopCpp/Clases/Pedido.h"
 #include "../../DeustoShopCpp/BD/Bd.h"
+#include "../Log/Logger.h"
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
 using namespace std;
 
-// Declaración y definición de la función log al principio del archivo
-void log(const std::string& mensaje) {
-    std::ofstream logFile("../Log/log.txt", std::ios::app);
-    if (!logFile) {
-        // Si falla, prueba con la ruta desde DeustoShopCpp
-        logFile.open("Log/log.txt", std::ios::app);
-    }
-    if (!logFile) {
-        std::cerr << "No se pudo abrir el archivo de log en ninguna ruta." << std::endl;
-        return;
-    }
-    time_t now = time(nullptr);
-    tm* ltm = localtime(&now);
-    char fechaHora[32];
-    strftime(fechaHora, sizeof(fechaHora), "%Y-%m-%d %H:%M:%S", ltm);
-    logFile << "[SERVIDOR] [" << fechaHora << "] " << mensaje << std::endl;
-}
 
 /*void guardarPedidosCsv(const vector<Pedido>& pedidos) {
     ofstream file("pedidos.csv");

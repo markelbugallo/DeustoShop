@@ -11,6 +11,7 @@
 #include "../BD/Bd.h"
 #include "../Clases/Almacen.h"
 #include "../Clases/Utils.h"
+#include "../Log/Logger.h"
 #include <set>
 #include <algorithm>
 #include <iomanip> // Asegúrate de tener este include arriba
@@ -22,24 +23,6 @@ using namespace std;
 
 // Definición del miembro estático para la conexión persistente
 ConexionServidor MenusCliente::conexionSesion;
-
-// Declaración y definición de la función log al principio del archivo
-void log(const std::string& mensaje) {
-    std::ofstream logFile("../Log/log.txt", std::ios::app);
-    if (!logFile) {
-        // Si falla, prueba con la ruta desde DeustoShopCpp
-        logFile.open("Log/log.txt", std::ios::app);
-    }
-    if (!logFile) {
-        std::cerr << "No se pudo abrir el archivo de log en ninguna ruta." << std::endl;
-        return;
-    }
-    time_t now = time(nullptr);
-    tm* ltm = localtime(&now);
-    char fechaHora[32];
-    strftime(fechaHora, sizeof(fechaHora), "%Y-%m-%d %H:%M:%S", ltm);
-    logFile << "[CLIENTE] [" << fechaHora << "] " << mensaje << std::endl;
-}
 
 
 
