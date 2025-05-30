@@ -12,7 +12,7 @@ struct Fecha
     int mes;
     int anyo;
 
-    // Parsea formato "YYYY-MM-DD"
+   
     static Fecha parse(const string &s) {
         Fecha f;
         char sep1, sep2;

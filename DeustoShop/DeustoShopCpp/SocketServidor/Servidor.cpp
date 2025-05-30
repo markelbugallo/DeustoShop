@@ -19,25 +19,6 @@
 
 using namespace std;
 
-
-/*void guardarPedidosCsv(const vector<Pedido>& pedidos) {
-    ofstream file("pedidos.csv");
-    for (const Pedido& p : pedidos) {
-        file << p.getId_pedido() << ";"
-             << p.getFecha_pedido().toString() << ";"
-             << p.getEstado_pedido() << ";"
-             << p.getId_usuario() << ";";
-        bool primero = true;
-        for (const auto& par : p.getProductosCantidades()) {
-            if (!primero) file << ",";
-            file << par.first << ":" << par.second;
-            primero = false;
-        }
-        file << ";" << p.getDireccion() << ";" << p.getCodigo_Postal() << "\n";
-    }
-    file.close();
-}*/
-
 int main() {
     WSADATA wsaData;
     SOCKET conn_socket, comm_socket;
@@ -80,7 +61,7 @@ int main() {
     log("Esperando conexiones...");
     int stsize = sizeof(struct sockaddr);
     while ((comm_socket = accept(conn_socket, (struct sockaddr*) &client, &stsize)) != INVALID_SOCKET) {
-        cargarDatos(); // Cargar datos antes de aceptar la conexión
+        cargarDatos(); 
 
         log(std::string("Conexion aceptada desde: ") + inet_ntoa(client.sin_addr) + " (" + to_string(ntohs(client.sin_port)) + ")");
         log("Esperando mensajes...");
@@ -223,7 +204,7 @@ int main() {
                     getline(ss, direccion, ';');
                     getline(ss, codigo_postal_str, ';');
 
-                    // Validación de campos
+             s
                     bool campos_ok = !id_pedido_str.empty() && !fecha_str.empty() && !estado.empty() &&
                                      !id_usuario_str.empty() && !productos_str.empty() &&
                                      !direccion.empty() && !codigo_postal_str.empty();
@@ -235,7 +216,7 @@ int main() {
                         int id_usuario = stoi(id_usuario_str);
                         int codigo_postal = stoi(codigo_postal_str);
 
-                        // Parsear productos
+           
                         map<int, int> productos;
                         if (!productos_str.empty()) {
                             stringstream ssProductos(productos_str);
@@ -250,7 +231,7 @@ int main() {
                             }
                         }
 
-                        // Parsea la fecha (YYYY-MM-DD)
+                       
                         int anyo, mes, dia;
                         char sep1, sep2;
                         istringstream is(fecha_str);

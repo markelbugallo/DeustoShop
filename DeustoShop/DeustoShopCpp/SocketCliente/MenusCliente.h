@@ -13,7 +13,7 @@
 #include <map>
 using namespace std;
 
-// Clase auxiliar para gestionar la conexión persistente
+
 class ConexionServidor {
 public:
     SOCKET s;

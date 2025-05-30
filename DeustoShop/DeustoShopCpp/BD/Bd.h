@@ -20,7 +20,7 @@ vector<Usuario> cargarUsuariosCSV(const string &fichero);
 void guardarUsuariosCsv(const vector<Usuario>& usuarios);
 void cargarDatos();
 
-// mapa para almacenar usuarios y sus contraseñas para el login
+
 extern map<string, string> usuariosContrasenas;
 extern vector<Almacen> almacenes;
 extern vector<Pedido> pedidos;

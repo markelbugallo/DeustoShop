@@ -14,14 +14,14 @@
 #include "../Log/Logger.h"
 #include <set>
 #include <algorithm>
-#include <iomanip> // Asegúrate de tener este include arriba
-#include <fstream> // Añadido para el logging
-#include <ctime> // Añadido para la función log
+#include <iomanip> 
+#include <fstream> 
+#include <ctime> 
 using namespace std;
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6000
 
-// Definición del miembro estático para la conexión persistente
+
 ConexionServidor MenusCliente::conexionSesion;
 
 
@@ -30,7 +30,7 @@ int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
     if (this->conexionSesion.conectada) {
         return this->conexionSesion.enviar(mensaje, respuesta) ? 0 : 1;
     } else {
-        // Fallback: conexión temporal (por si acaso)
+        
         ConexionServidor temp;
         if (!temp.conectar()) {
             log("Error: No se pudo conectar al servidor (mandarAlServidor)");
@@ -85,10 +85,10 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     Usuario nuevoUsuario;
     cout << "\nMENU DE REGISTRO\n" << "Introduzca los siguientes apartados...\n";
     cout << "Nombre de usuario: ";
-    getline(cin >> ws, nombre_usu); // Usar getline para evitar problemas de salto de línea
+    getline(cin >> ws, nombre_usu); 
     nuevoUsuario.setNombre_usuario(nombre_usu);
     cout << "Contrasena: ";
-    getline(cin >> ws, contrasena); // Usar getline para evitar problemas de salto de línea
+    getline(cin >> ws, contrasena); 
     nuevoUsuario.setContrasena_usuario(contrasena);
     cout << "Direccion: ";
     getline(cin >> ws, direccion);
@@ -220,7 +220,7 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
                 }
                 log("Inicio de sesion correcto (servidor) para usuario: " + nombre);
                 cout << endl << "Inicio de sesion correcto (servidor)" << endl << endl;
-                conexion.cerrar(); // CIERRA LA CONEXIÓN AQUÍ
+                conexion.cerrar(); 
                 break;
             } else if (respuesta == "EXITO") {
                 log("Inicio de sesion correcto (servidor) para usuario: " + nombre);
@@ -244,12 +244,12 @@ Usuario MenusCliente::mostrarMenuInicioSesion() {
             break;
         }
     }
-    // NO guardes la conexión como miembro de la clase
+ 
     return usuario_actual;
 }
 
 void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
-    cargarDatos(); // Recarga usuarios y contraseñas desde el CSV
+    cargarDatos(); 
     int opcion = 0;
 
     cout << "\nMENU PRINCIPAL\n";
@@ -277,32 +277,12 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
     }
 }
 
-/*void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
-    //mostrarListaProductos();
-
-    char respuesta;
-    cout << "\n¿Quieres anyadir algun producto a tu cesta? (s/n): ";
-    cin >> respuesta;
-
-    while (respuesta == 's' || respuesta == 'S') {
-        int id_producto, cantidad;
-        cout << "Introduce el ID del producto: ";
-        cin >> id_producto;
-        cout << "Introduce la cantidad: ";
-        cin >> cantidad;
-
-        cesta[id_producto] += cantidad;
-
-        cout << "¿Quieres anyadir otro producto? (s/n): ";
-        cin >> respuesta;
-    }
-}*/
 double MenusCliente::obtenerPrecioProducto(int id_producto) {
     double precio = 0.0;
-    for (const Producto& prod : productos) { // Usa el vector correcto
+    for (const Producto& prod : productos) { 
         if (prod.getId_producto() == id_producto) {
             precio = prod.getPrecio();
-            break; // Salimos del bucle una vez encontrado el producto
+            break; 
         }
     }
   return precio; ; 
@@ -339,24 +319,24 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
         } else if (opcion == 2) {
             cesta.clear();
         } else if (opcion == 3 && !cesta.empty()) {
-            // Obtener fecha actual en formato YYYY-MM-DD
+            
             time_t t = time(nullptr);
             tm* now = localtime(&t);
             char fechaStr[11];
-            strftime(fechaStr, sizeof(fechaStr), "%Y-%m-%d", now); // <-- FORMATO CORRECTO
+            strftime(fechaStr, sizeof(fechaStr), "%Y-%m-%d", now);
 
-            // Calcular el nuevo id de pedido
+            
             int nuevo_id_pedido = pedidos.size() + 1;
 
-            // Construir mensaje en formato CSV
+            
             stringstream mensaje;
             mensaje << "REALIZAR_PEDIDO;"
                     << nuevo_id_pedido << ";"
-                    << fechaStr << ";" // <-- FECHA EN FORMATO CORRECTO
+                    << fechaStr << ";" 
                     << "procesando solicitud" << ";"
                     << usuario_actual.getId_usuario() << ";";
 
-            // Productos
+           
             bool primero = true;
             for (const auto& par : cesta) {
                 if (!primero) mensaje << ",";
@@ -368,7 +348,7 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
 
             string respuesta;
             if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
-                // Limpiar caracteres de control de la respuesta
+              
                 respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
                 respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
 
@@ -430,7 +410,7 @@ void MenusCliente::mostrarMenuProductos(Usuario usuario_actual) {
         } else if (opcion == 2) {
             mostrarProductosPorCategoria(usuario_actual);
         } else if (opcion == 3) {
-            // Añadir producto a la cesta
+            
             int id_producto, cantidad;
             cout << "Introduce el ID del producto: ";
             cin >> id_producto;
@@ -469,17 +449,6 @@ void MenusCliente::mostrarTodosLosProductos(Usuario& usuario_actual) {
         cout << "Opcion no valida, volviendo al menu principal..." << endl;
         mostrarMenuPrincipal(usuario_actual);
     }
-/*
-    opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
-
-    cout << endl;
-
-    if (opcion == 1)
-    {
-        mostrarMenuPrincipal(usuario_actual);
-    }
-        */
-
 
 }
 
@@ -532,13 +501,7 @@ void MenusCliente::mostrarProductosPorCategoria(Usuario& usuario_actual) {
         mostrarMenuPrincipal(usuario_actual);
     }
 
-   // opcion = pedirEntero("\nPulsa 1 para volver al menu principal: ");
- // cout << endl;
 
-    // if (opcion == 1)
-    // {
-    //     mostrarMenuPrincipal(usuario_actual);
-    // }
 }
 
 void MenusCliente::mostrarHistorialCompras(Usuario usuario_actual) {
@@ -585,12 +548,11 @@ void MenusCliente::mostrarAlmacenes(Usuario usuario_actual) {
 void MenusCliente::editarPerfil(Usuario& usuario_actual) {
     int opcion;
     string nuevoValor;
-    string nombre_anterior = usuario_actual.getNombre_usuario(); // Guarda el nombre antes de editar
+    string nombre_anterior = usuario_actual.getNombre_usuario(); 
     cout << "\nQUE DESEA EDITAR\n";
     cout << "1) Nombre\n";
     cout << "2) Contrasena\n";
     cout << "3) Contacto\n";
-    //cout << "4) Direccion\n";
     cout << "5) Codigo Postal\n";
     cout << "6) Volver\n";
     opcion = pedirEntero("Seleccione una opcion: ");
@@ -629,7 +591,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
             return;
     }
 
-    // Enviar actualización al servidor
+   
     stringstream mensaje;
     mensaje << "EDITAR_USUARIO;"
             << usuario_actual.getId_usuario() << ";"
@@ -642,7 +604,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
 
     string respuesta;
     if (mandarAlServidor(mensaje.str(), respuesta) == 0) {
-        // Limpia saltos de línea
+    
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\n'), respuesta.end());
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
 
@@ -650,7 +612,7 @@ void MenusCliente::editarPerfil(Usuario& usuario_actual) {
         cout << "DEBUG: Respuesta del servidor: " << respuesta << endl;
 
         if (respuesta.rfind("OK;", 0) == 0) {
-            // Procesa la respuesta y actualiza usuario_actual
+        
             vector<string> partes;
             stringstream ss(respuesta);
             string item;
@@ -696,20 +658,7 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
         respuesta.erase(remove(respuesta.begin(), respuesta.end(), '\r'), respuesta.end());
         if (respuesta == "OK" || respuesta == "OK;") {
             log("Perfil eliminado correctamente para usuario: " + usuario_actual.getNombre_usuario());
-            // Elimina localmente del vector usuarios
-        /*    usuarios.erase(
-                remove_if(usuarios.begin(), usuarios.end(),
-                    [&](const Usuario& u) { return u.getId_usuario() == usuario_actual.getId_usuario(); }),
-                usuarios.end()
-            );
-            // Elimina del mapa usuariosContrasenas
-            usuariosContrasenas.erase(usuario_actual.getNombre_usuario());
-            // Guarda el CSV actualizado
-            guardarUsuariosCsv(usuarios);
-            cout << "Perfil eliminado correctamente.\n";
-            // Cierra la conexión de la sesión
-            this->conexionSesion.cerrar();
-            // Volver al menú inicial tras eliminar*/
+     
             mostrarMenuInicial();
             return;
         } else if (respuesta.rfind("ERROR;", 0) == 0) {
@@ -723,11 +672,11 @@ void MenusCliente::eliminarPerfil(Usuario& usuario_actual) {
         log("Error de conexion con el servidor al eliminar perfil");
         cout << "Error de conexion con el servidor.\n";
     }
-    // Si llega aquí, no se eliminó correctamente, vuelve al menú de perfil
+  
     mostrarMenuMiPerfil(usuario_actual);
 }
 
-// Modifica mostrarMenuMiPerfil para llamar a editarPerfil
+
 void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
     int opcion;
     while (true) {
@@ -742,8 +691,7 @@ void MenusCliente::mostrarMenuMiPerfil(Usuario& usuario_actual) {
 
         if (opcion == 1) {
             editarPerfil(usuario_actual);
-            // Ya se actualiza usuario_actual, solo refrescamos la vista
-            // No reiniciar sesion ni pedir datos antiguos
+           
         } else if (opcion == 2) {
             eliminarPerfil(usuario_actual);
             return;
@@ -827,9 +775,9 @@ string pedirCompra(const string& mensaje) {
 void procesarComando(const string& comando, const string& datos, string& respuestaServidor) {
     stringstream ss(datos);
     if (comando == "REGISTRAR_USUARIO") {
-        // ... (código existente para REGISTRAR_USUARIO)
+      
     } else if (comando == "LOGIN") {
-        // ... (código existente para LOGIN)
+       
     } else if (comando == "REALIZAR_PEDIDO") {
         string id_usuario_str, direccion, codigo_postal_str, productos_str;
         getline(ss, id_usuario_str, ';');
@@ -850,11 +798,11 @@ void procesarComando(const string& comando, const string& datos, string& respues
             }
         }
         int id_pedido = pedidos.size() + 1;
-        Fecha fecha_actual; // Asegúrate de inicializar la fecha correctamente
+        Fecha fecha_actual; 
         Pedido nuevoPedido(id_pedido, fecha_actual, "Pendiente", id_usuario, productos, direccion, codigo_postal);
         pedidos.push_back(nuevoPedido);
-        // guardarPedidosCsv(pedidos); // Si tienes persistencia
+       
         respuestaServidor = "OK;Pedido registrado";
     }
-    // ... (otros comandos)
+
 }
