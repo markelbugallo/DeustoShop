@@ -284,4 +284,38 @@ void guardarUsuariosCsv(const vector<Usuario>& usuarios) {
              << u.getCodigo_postal() << "\n";
     }
 }
+
+vector<Almacen> almacenes;
+vector<Pedido> pedidos;
+vector<Producto> productos;
+vector<Proveedor> proveedores;
+vector<Subscripcion> subscripciones;
+vector<Usuario> usuarios;
 map<string, string> usuariosContrasenas;
+
+void cargarDatos() {
+    // vaciar listas
+    almacenes.clear();
+    pedidos.clear();
+    productos.clear();
+    proveedores.clear();
+    subscripciones.clear();
+    usuarios.clear();
+
+    // volver a cargar
+    almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
+    pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
+    productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
+    proveedores = cargarProveedoresCSV("../DeustoShopC/Data/proveedores.csv");
+    subscripciones  = cargarSubscripcionesCSV("../DeustoShopC/Data/Subscripciones.csv");
+    usuarios = cargarUsuariosCSV("../DeustoShopC/Data/usuarios.csv");
+
+    // usuarios y contraseñas
+    for (size_t i = 0; i < usuarios.size(); i++)
+    {
+        if (usuariosContrasenas.find((usuarios[i].getNombre_usuario())) == usuariosContrasenas.end())
+        {
+            usuariosContrasenas[usuarios[i].getNombre_usuario()] = usuarios[i].getContrasena_usuario();
+        }
+    }   
+}

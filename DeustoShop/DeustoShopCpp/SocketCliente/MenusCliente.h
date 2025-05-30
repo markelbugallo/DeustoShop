@@ -27,16 +27,9 @@ public:
 class MenusCliente
 {
 private:
-    vector<Almacen> almacenes;
-    vector<Pedido> pedidos;
-    vector<Producto> productos;
-    vector<Proveedor> proveedores;
-    vector<Subscripcion> subscripciones;
-    vector<Usuario> usuarios;
     map<int,int> cesta;
     vector<Producto> listaProductos;
 public:
-    void cargarDatos();
     int mandarAlServidor(const std::string &mensaje, std::string &respuesta);
     void mostrarMenuInicial();
     Usuario mostrarMenuRegistro();

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <conio.h>
 #include <stdio.h>
 #include <winsock2.h>
 #include <sstream>
@@ -16,32 +17,6 @@ using namespace std;
 // Definición del miembro estático para la conexión persistente
 ConexionServidor MenusCliente::conexionSesion;
 
-void MenusCliente::cargarDatos() {
-    // vaciar listas
-    almacenes.clear();
-    pedidos.clear();
-    productos.clear();
-    proveedores.clear();
-    subscripciones.clear();
-    usuarios.clear();
-
-    // volver a cargar
-    almacenes = cargarAlmacenesCSV("../DeustoShopC/Data/almacenes.csv");
-    pedidos = cargarPedidosCSV("../DeustoShopC/Data/pedidos.csv");
-    productos = cargarProductosCSV("../DeustoShopC/Data/productos.csv");
-    proveedores = cargarProveedoresCSV("../DeustoShopC/Data/proveedores.csv");
-    subscripciones  = cargarSubscripcionesCSV("../DeustoShopC/Data/Subscripciones.csv");
-    usuarios = cargarUsuariosCSV("../DeustoShopC/Data/usuarios.csv");
-
-    // usuarios y contraseñas
-    for (size_t i = 0; i < usuarios.size(); i++)
-    {
-        if (usuariosContrasenas.find((usuarios[i].getNombre_usuario())) == usuariosContrasenas.end())
-        {
-            usuariosContrasenas[usuarios[i].getNombre_usuario()] = usuarios[i].getContrasena_usuario();
-        }
-    }   
-}
 
 int MenusCliente::mandarAlServidor(const string &mensaje, string &respuesta) {
     if (this->conexionSesion.conectada) {
@@ -178,6 +153,8 @@ Usuario MenusCliente::mostrarMenuRegistro() {
     } else if (respuesta.rfind("ERROR;", 0) == 0) {
         cout << "Error del servidor: " << respuesta.substr(6) << endl;
         conexion.cerrar();
+        mostrarMenuInicial();
+        cout << endl << endl;
         return Usuario();
     } else {
         cout << "Error al registrar usuario en el servidor.\n";
@@ -282,13 +259,13 @@ void MenusCliente::mostrarMenuPrincipal(Usuario usuario_actual) {
         mostrarMenuInicial();
     }else if( opcion == 6)
     {
-    map<int, int> productosPedido = Pedido::realizarPedidoInteractivo(); 
+    map<int, int> productosPedido = Pedido::realizarPedidoInteractivo(usuario_actual); 
       } else if (opcion == 7) {
         mostrarMenuCesta(usuario_actual);
     } 
 }
 
-void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
+/*void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
     //mostrarListaProductos();
 
     char respuesta;
@@ -307,7 +284,7 @@ void MenusCliente::mostrarMenuC(Usuario usuario_actual) {
         cout << "¿Quieres anyadir otro producto? (s/n): ";
         cin >> respuesta;
     }
-}
+}*/
 double MenusCliente::obtenerPrecioProducto(int id_producto) {
     for (Producto prod : productos) { 
         if (prod.getId_producto() == id_producto) {
@@ -360,8 +337,11 @@ void MenusCliente::mostrarMenuCesta(Usuario& usuario_actual) {
             usuario_actual.agregarPedido(nuevoPedido);
             cesta.clear();
             cout << "¡Pedido realizado!\n";
+        } else if (opcion == 4) {
+            mostrarMenuPrincipal(usuario_actual);
+            break;
         }
-    } while (opcion != 4);
+    } while (true);
 }
 
 
